@@ -1,0 +1,15 @@
+{
+  "name": "geotool",
+  "version": "0.0.1",
+  "description": "This tool helps with creating layers for Leaflet maps.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "WRK/FMD",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^3.4.5"
+  },
+  "dependencies": {}
+}
