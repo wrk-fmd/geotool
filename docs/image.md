@@ -25,11 +25,11 @@ If an image overlay is selected multiple additional buttons are added in the bot
   Toggle the scaling mode to resize the image.
   Shortcut: <code>S</code>
 
-* <img src="icons/expand-solid.svg" height="20"/>
+* <img src="icons/sync-solid.svg" height="20"/>
   Toggle the rotation mode.
   Shortcut: <code>R</code>
 
-* <img src="icons/expand-solid.svg" height="20"/>
+* <img src="icons/circle-notch-solid.svg" height="20"/>
   Toggle the free distortion mode.
   Shortcut: <code>D</code>
 
