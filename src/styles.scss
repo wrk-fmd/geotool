@@ -1,0 +1,30 @@
+/**
+ * This SCSS file combines all the required CSS
+ */
+
+// Import the (precompiled) CSS for Leaflet
+@import "~leaflet/dist/leaflet.css";
+
+// Import required Fontawesome styles
+$fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
+@import "~@fortawesome/fontawesome-free/scss/variables";
+@import "~@fortawesome/fontawesome-free/scss/mixins";
+@import "~@fortawesome/fontawesome-free/scss/core";
+@import "~@fortawesome/fontawesome-free/scss/larger";
+@import "~@fortawesome/fontawesome-free/scss/icons";
+@import "~@fortawesome/fontawesome-free/scss/solid";
+
+// Make the view full height (required to automatically grow the map)
+html, body {
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+#map {
+  height: 100%;
+}
+
+.state-active {
+  color: #0078A8;
+}
