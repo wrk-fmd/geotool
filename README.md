@@ -28,3 +28,14 @@ running it from the local filesystem is enough.
 ## Usage
 
 Usage instructions can be found in the [manual](docs/MANUAL.md).
+
+## License
+
+This application and its source code are published under the [MIT license](LICENSE).
+
+The core of the application is based on [Leaflet](https://github.com/Leaflet/Leaflet).
+
+Both the application and documentation use [Font Awesome](https://github.com/FortAwesome/Font-Awesome),
+available under the MIT license.
+
+Some code is based on [glMatrix](https://github.com/toji/gl-matrix), available under the MIT license.
