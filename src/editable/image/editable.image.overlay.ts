@@ -1,4 +1,4 @@
-import {Control, DomUtil, Draggable, GeoJSON, LatLng, layerGroup, LayerGroup, Map, Point} from "leaflet";
+import {Control, DomUtil, Draggable, GeoJSON, LatLng, layerGroup, LayerGroup, Map, Point, Util} from "leaflet";
 
 import {ToggleButton, ToggleGroup} from "../../button";
 import {ImageInfo, ImageOverlayFeature} from "../../config";
@@ -356,7 +356,12 @@ export class EditableImageOverlay extends TransformedImageOverlay implements Edi
       geometry: {
         type: "Polygon",
         coordinates: [GeoJSON.latLngsToCoords(this.getCorners(), 0, true)],
-        bbox: [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()]
+        bbox: [
+          Util.formatNum(bounds.getWest()),
+          Util.formatNum(bounds.getSouth()),
+          Util.formatNum(bounds.getEast()),
+          Util.formatNum(bounds.getNorth())
+        ]
       },
       properties: {
         originalFile: this.imageInfo.name,
