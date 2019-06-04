@@ -108,14 +108,16 @@ export class EditableImageOverlay extends TransformedImageOverlay implements Edi
       this.handles[3].latlng = this._map.containerPointToLatLng([left, bottom]);
     }
 
+    this.updateLayer();
+    super.onAdd(map);
+
     // Make draggable
     this.draggable = new Draggable(this.getElement()!);
     this.draggable._updatePosition = () => {
       this.move(this._map.latLngToLayerPoint(this.getCorners()[0]), this.draggable!._newPos);
     };
 
-    this.updateLayer();
-    return super.onAdd(map);
+    return this;
   }
 
   /**
