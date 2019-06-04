@@ -16,7 +16,13 @@ module.exports = {
       },
       {
         test: /\.(png|jpg|gif|svg|ttf|woff2?|eot)$/,
-        use: "file-loader"
+        use: {
+          loader: "file-loader",
+          options: {
+            name: "[name].[ext]",
+            outputPath: "assets"
+          }
+        }
       }
     ]
   },
