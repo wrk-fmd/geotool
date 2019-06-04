@@ -260,10 +260,10 @@ export class EditableImageOverlay extends TransformedImageOverlay implements Edi
    */
   private setHandleAngles() {
     const c = this.handles.map(handle => this._map.latLngToLayerPoint(handle.latlng));
-    this.handles[0].setAngle(this.calculateMidAngle(c[0], c[1], c[2]));
-    this.handles[1].setAngle(this.calculateMidAngle(c[1], c[0], c[3]));
-    this.handles[2].setAngle(this.calculateMidAngle(c[2], c[0], c[3]));
-    this.handles[3].setAngle(this.calculateMidAngle(c[3], c[1], c[2]));
+    this.handles[0].setAngle(this.calculateMidAngle(c[0], c[1], c[3]));
+    this.handles[1].setAngle(this.calculateMidAngle(c[1], c[0], c[2]));
+    this.handles[2].setAngle(this.calculateMidAngle(c[2], c[1], c[3]));
+    this.handles[3].setAngle(this.calculateMidAngle(c[3], c[0], c[2]));
   }
 
   /**
