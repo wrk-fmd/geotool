@@ -12,6 +12,7 @@ declare module "leaflet" {
 }
 
 export type CornerNumber = 0 | 1 | 2 | 3;
+export type Corners = [LatLng, LatLng, LatLng, LatLng];
 
 /**
  * An extension of the regular Leaflet image overlay that can be transformed with CSS transforms
@@ -24,14 +25,21 @@ export class TransformedImageOverlay extends ImageOverlay {
    * @param corners The coordinates of the four corners
    * @param options Additional options passed to the regular overlay
    */
-  constructor(src: string, private corners: [LatLng, LatLng, LatLng, LatLng], options?: ImageOverlayOptions) {
+  constructor(src: string, private corners: Corners, options?: ImageOverlayOptions) {
     super(src, latLngBounds(corners[2], corners[1]), options);
+  }
+
+  /**
+   * Check if the corners are valid (any corner not [0,0])
+   */
+  cornersValid(): boolean {
+    return this.corners.filter(c => c.lat || c.lng).length > 0;
   }
 
   /**
    * Get the current coordinates for the four corners
    */
-  getCorners(): [LatLng, LatLng, LatLng, LatLng] {
+  getCorners(): Corners {
     return this.corners;
   }
 
@@ -57,7 +65,7 @@ export class TransformedImageOverlay extends ImageOverlay {
    * Update the coordinates of all corners
    * @param corners The new corner coordinates
    */
-  setCorners(corners: [LatLng, LatLng, LatLng, LatLng]) {
+  setCorners(corners: Corners) {
     this.corners = corners;
     this.updateTransform();
   }
@@ -81,13 +89,13 @@ export class TransformedImageOverlay extends ImageOverlay {
    * @param latLngToLayerPoint An optional mapping function from coordinates to pixels to use instead of the default
    */
   private getTransformationMatrix(latLngToLayerPoint?: (latlng: LatLng) => Point): Matrix4 | null {
-    if (!this._map) {
+    const image = this.getElement();
+    if (!this._map || !image) {
       return null;
     }
 
     const latLngToLayerPointFn = latLngToLayerPoint || (latlng => this._map.latLngToLayerPoint(latlng));
     const offset = latLngToLayerPointFn(this.corners[0]),
-      image = this.getElement()!,
       w = image.offsetWidth,
       h = image.offsetHeight,
       c = this.corners.map(corner => latLngToLayerPointFn(corner).subtract(offset));
@@ -95,8 +103,8 @@ export class TransformedImageOverlay extends ImageOverlay {
     return Projection.project2D(
       PointMapping.map(0, 0, c[0].x, c[0].y),
       PointMapping.map(w, 0, c[1].x, c[1].y),
-      PointMapping.map(0, h, c[2].x, c[2].y),
-      PointMapping.map(w, h, c[3].x, c[3].y),
+      PointMapping.map(0, h, c[3].x, c[3].y),
+      PointMapping.map(w, h, c[2].x, c[2].y),
     ).toMatrix3D();
   }
 
@@ -105,14 +113,14 @@ export class TransformedImageOverlay extends ImageOverlay {
    * @param latLngToLayerPoint An optional mapping function from coordinates to pixels to use instead of the default
    */
   private updateTransform(latLngToLayerPoint?: (latlng: LatLng) => Point) {
-    if (!this._map) {
+    const image = this.getElement();
+    if (!this._map || !image) {
       return;
     }
 
     const latLngToLayerPointFn = latLngToLayerPoint || (latlng => this._map.latLngToLayerPoint(latlng));
     const offset = latLngToLayerPointFn(this.corners[0]),
-      matrix = this.getTransformationMatrix(latLngToLayerPointFn),
-      image = this.getElement()!;
+      matrix = this.getTransformationMatrix(latLngToLayerPointFn);
 
     (<any>image)._leaflet_pos = offset;
     image.style.transform = `translate3d(${offset.x}px,${offset.y}px,0) matrix3d(${matrix})`;

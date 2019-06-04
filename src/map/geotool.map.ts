@@ -1,13 +1,13 @@
 import {control, latLngBounds, Map, tileLayer} from "leaflet";
 
-import {FeatureSetConfig, ImageOverlayConfig} from "../config";
-import {FeatureSet, ImageFeatureSet} from "../feature-set";
+import {EditableFeatureCollection} from "../editable";
 import {FileListener} from "../file";
+import {NamedFeatureCollection} from "../geojson";
 import {ActionsControl} from "./actions.control";
-import {FeatureSetsControl} from "./feature.sets.control";
+import {FeatureCollectionsControl} from "./feature.collections.control";
 
-export type FeatureSetSelectCallback = (featureSet: FeatureSet | null) => void;
-export type FeatureSetChangeCallback = (featureSet: FeatureSet) => void;
+export type FeatureCollectionSelectCallback = (featureCollection: EditableFeatureCollection | null) => void;
+export type FeatureCollectionChangeCallback = (featureCollection: EditableFeatureCollection) => void;
 
 /**
  * This class acts as an entry point to the application and displays the map and controls
@@ -20,13 +20,13 @@ export class GeotoolMap extends Map {
   private static readonly basemapBounds = latLngBounds([46.358770, 8.782379], [49.037872, 17.5]);
 
   private readonly controls: ActionsControl;
-  private readonly featureSets: FeatureSetsControl;
+  private readonly featureCollections: FeatureCollectionsControl;
 
-  private selectedSet: FeatureSet | null = null;
+  private selectedCollection: EditableFeatureCollection | null = null;
 
-  private selectCallbacks: FeatureSetSelectCallback[] = [];
-  private deleteCallbacks: FeatureSetChangeCallback[] = [];
-  private updateCallbacks: FeatureSetChangeCallback[] = [];
+  private selectCallbacks: FeatureCollectionSelectCallback[] = [];
+  private deleteCallbacks: FeatureCollectionChangeCallback[] = [];
+  private updateCallbacks: FeatureCollectionChangeCallback[] = [];
 
   constructor(selector: string) {
     super(selector, {
@@ -55,109 +55,103 @@ export class GeotoolMap extends Map {
     hidpiLayer.addTo(this);
     control.layers({"Map": hidpiLayer, "Orthophoto": orthoLayer, "OpenStreetMap": osmLayer}).addTo(this);
 
-    // Create controls for the feature sets
-    this.featureSets = new FeatureSetsControl({position: "bottomleft"}).addTo(this);
+    // Create controls for the feature collections
+    this.featureCollections = new FeatureCollectionsControl({position: "bottomleft"}).addTo(this);
     this.controls = new ActionsControl({position: "bottomleft"}).addTo(this);
 
     // Listen for dropped files
-    new FileListener(document.body, config => this.addFeatureSet(config));
+    new FileListener(document.body, config => this.addFeatureCollection(config));
 
     // Focus the map so keyboard navigation can be used
     this.getContainer().focus();
   }
 
   /**
-   * Add a feature set to the map
-   * @param config The config object containing the relevant parameters for the feature set
+   * Add a feature collection to the map
+   * @param config The config object containing the relevant parameters for the feature collection
    */
-  addFeatureSet(config: FeatureSetConfig) {
-    let featureSet;
-    switch (config.type) {
-      case "image":
-        featureSet = new ImageFeatureSet(<ImageOverlayConfig>config, this);
-        break;
-      default:
-        window.alert("Could not create layer from invalid config");
-        return;
-    }
+  addFeatureCollection(config: NamedFeatureCollection) {
+    // Create a new editable feature collection from the config object
+    const featureCollection = new EditableFeatureCollection(config).addTo(this);
 
-    // Add it to the feature sets control and immediately select it
-    this.featureSets.addFeatureSet(featureSet);
-    this.selectFeatureSet(featureSet);
+    // Add it to the feature collections control and immediately select it
+    this.featureCollections.addFeatureCollection(featureCollection);
+    this.selectFeatureCollection(featureCollection);
   }
 
   /**
-   * Completely remove a feature set from the map
-   * @param featureSet The feature set to delete
+   * Completely remove a feature collection from the map
+   * @param featureCollection The feature collection to delete
    */
-  deleteFeatureSet(featureSet: FeatureSet) {
-    // Call the destruction logic of the feature set
-    featureSet.remove();
+  deleteFeatureCollection(featureCollection: EditableFeatureCollection) {
+    // Call the destruction logic of the feature collection
+    featureCollection.remove();
 
-    if (featureSet === this.selectedSet) {
-      // Unselect the feature set if it was active
-      this.selectedSet = null;
+    if (featureCollection === this.selectedCollection) {
+      // Unselect the feature collection if it was active
+      this.selectedCollection = null;
     }
 
     // Trigger callbacks
-    this.deleteCallbacks.forEach(callback => callback(featureSet));
+    this.deleteCallbacks.forEach(callback => callback(featureCollection));
   }
 
   /**
-   * Called when a feature set's information should be updated
+   * Called when a feature collections's information has been updated
+   * @param featureCollection The feature collection that has been updated
    */
-  updateFeatureSet(featureSet: FeatureSet) {
+  updateFeatureCollection(featureCollection: EditableFeatureCollection) {
     // Trigger callbacks
-    this.updateCallbacks.forEach(callback => callback(featureSet));
+    this.updateCallbacks.forEach(callback => callback(featureCollection));
   }
 
   /**
-   * Change the selected feature set
-   * @param featureSet The selected feature set, or null to unselect all feature sets
+   * Change the selected feature collection
+   * @param featureCollection The selected feature collection, or null to unselect all feature collections
    */
-  selectFeatureSet(featureSet: FeatureSet | null) {
-    if (featureSet === this.selectedSet) {
-      // Do nothing if the feature set has been selected already
+  selectFeatureCollection(featureCollection: EditableFeatureCollection | null) {
+    if (featureCollection === this.selectedCollection) {
+      // Do nothing if the feature collection has been selected already
       return;
     }
 
-    if (this.selectedSet) {
-      // Unselect the previously active feature set
-      this.selectedSet.select(false);
+    if (this.selectedCollection) {
+      // Unselect the previously active feature collection
+      this.selectedCollection.select(false);
     }
 
-    this.selectedSet = featureSet;
+    this.selectedCollection = featureCollection;
 
     // Trigger callbacks
-    this.selectCallbacks.forEach(callback => callback(featureSet));
+    this.selectCallbacks.forEach(callback => callback(featureCollection));
 
-    if (featureSet) {
-      // Mark the set as selected
-      featureSet.select(true);
+    if (featureCollection) {
+      // Mark the collection as selected
+      featureCollection.select(true);
     }
   }
 
   /**
-   * Add a callback for whenever the selected feature set changes
-   * @param callback A function called with the new active feature set
+   * Add a callback for whenever the selected feature collection changes
+   * @param callback A function called with the new active feature collection
    */
-  addSelectCallback(callback: FeatureSetSelectCallback) {
+  addSelectCallback(callback: FeatureCollectionSelectCallback) {
     this.selectCallbacks.push(callback);
   }
 
   /**
-   * Add a callback for whenever a feature set is deleted
-   * @param callback A function called with the deleted feature set
+   * Add a callback for whenever a feature collection is deleted
+   * @param callback A function called with the deleted feature collection
    */
-  addDeleteCallback(callback: FeatureSetChangeCallback) {
+  addDeleteCallback(callback: FeatureCollectionChangeCallback) {
     this.deleteCallbacks.push(callback);
   }
 
   /**
-   * Add a callback for whenever a feature set is updated
-   * @param callback A function called with the updated feature set
+   * Add a callback for whenever a feature collection is updated
+   * @param callback A function called with the updated feature collection
    */
-  addUpdateCallback(callback: FeatureSetChangeCallback) {
+  addUpdateCallback(callback: FeatureCollectionChangeCallback) {
     this.updateCallbacks.push(callback);
   }
 }

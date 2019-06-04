@@ -1,4 +1,7 @@
-import {FeatureSetConfig, ImageInfo, ImageOverlayConfig} from "../config";
+import {Feature, FeatureCollection} from "geojson";
+
+import {ImageInfo, ImageOverlayFeature, isImageOverlayFeature} from "../config";
+import {NamedFeatureCollection} from "../geojson";
 
 /**
  * This class listens for files dragged into the application and loads them
@@ -10,7 +13,7 @@ export class FileListener {
    * @param element The element the listener should attach itself to
    * @param onLoad The event triggered whenever a file was successfully loaded
    */
-  constructor(element: HTMLElement, private readonly onLoad: (config: FeatureSetConfig) => void) {
+  constructor(element: HTMLElement, private readonly onLoad: (config: NamedFeatureCollection) => void) {
     element.addEventListener("dragover", e => this.handleDrag(e));
     element.addEventListener("drop", e => this.handleDrop(e));
   }
@@ -36,7 +39,7 @@ export class FileListener {
     }
 
     const files = e.dataTransfer.files;
-    const configs: Promise<FeatureSetConfig>[] = [], images: Promise<ImageInfo>[] = [];
+    const configs: Promise<NamedFeatureCollection>[] = [], images: Promise<ImageInfo>[] = [];
 
     // Loop through all dropped files and handle them asynchronously
     for (let i = 0; i < files.length; i++) {
@@ -45,9 +48,10 @@ export class FileListener {
         case "image/png":
         case "image/jpeg":
           // Read an image file
-          images.push(this.readUploadedFile(r => r.readAsDataURL(f)).then(ImageInfo.loadImage));
+          images.push(this.readUploadedFile(r => r.readAsDataURL(f)).then(src => ImageInfo.loadImage(src, f.name)));
           break;
         case "application/json":
+        case "application/geo+json":
           // Read a JSON config file
           configs.push(this.readUploadedFile(r => r.readAsText(f)).then(JSON.parse));
           break;
@@ -95,41 +99,69 @@ export class FileListener {
    * @param configs A list of loaded config data
    * @param images A list of loaded image data
    */
-  private handleData(configs: FeatureSetConfig[], images: ImageInfo[]) {
-    if (images.length > 1) {
-      window.alert("Only one image can be added at a time.");
-      return;
-    }
+  private handleData(configs: NamedFeatureCollection[], images: ImageInfo[]) {
+    configs = configs.filter(c => c.type === "FeatureCollection" && c.features);
+
+    let config: NamedFeatureCollection;
     if (configs.length > 1) {
-      window.alert("Only one config can be added at a time.");
+      config = {
+        type: "FeatureCollection",
+        features: configs.reduce<Feature[]>((arr, c) => arr.concat(c.features), []),
+        name: "New combined feature collection"
+      }
+    } else if (configs.length) {
+      config = configs[0];
+      if (!config.name) {
+        config.name = "Imported feature collection";
+      }
+    } else if (images.length) {
+      config = {
+        type: "FeatureCollection",
+        features: [],
+        name: "New image overlay"
+      }
+    } else {
+      window.alert("No data found to add");
       return;
     }
 
-    let config = configs.length ? configs[0] : null;
+    const imagePolygons: { [originalFile: string]: ImageOverlayFeature } = {};
+    config.features.forEach(f => {
+      if (isImageOverlayFeature(f)) {
+        imagePolygons[f.properties.originalFile] = f;
+      }
+    });
 
     if (images.length) {
-      if (!config) {
-        // One image added, but config should be created (new overlay)
-        config = <ImageOverlayConfig>{
-          name: "New image overlay",
-          type: "image",
-          imageInfo: images[0]
-        };
-      } else if (config.type === "image") {
-        // Combine the existing config with the image file (resume work on an existing overlay)
-        (<ImageOverlayConfig>config).imageInfo = images[0];
-      } else {
-        // Config type not valid for adding images
-        window.alert("Config JSON does not match type image.");
-        return;
-      }
+      images.forEach(image => {
+        if (imagePolygons[image.name]) {
+          imagePolygons[image.name].imageInfo = image;
+          delete imagePolygons[image.name];
+        } else {
+          config.features.push(this.createImageOverlayFeature(image));
+        }
+      })
     }
 
-    if (!config || !config.name || !config.type) {
-      window.alert("No valid configuration found.");
-      return;
+    const missingImages = Object.keys(imagePolygons);
+    if (missingImages.length) {
+      window.alert(`Some image files were missing: ${missingImages.join(", ")}`);
     }
 
     this.onLoad(config);
+  }
+
+  private createImageOverlayFeature(image: ImageInfo): ImageOverlayFeature {
+    return {
+      type: "Feature",
+      geometry: {
+        type: "Polygon",
+        coordinates: [[[0, 0], [0, 0], [0, 0], [0, 0], [0, 0]]]
+      },
+      properties: {
+        originalFile: image.name
+      },
+      imageInfo: image
+    }
   }
 }

@@ -1,11 +1,11 @@
-import {DomUtil, Draggable, latLng, LatLng, layerGroup, LayerGroup, Map, Point} from "leaflet";
+import {Control, DomUtil, Draggable, GeoJSON, LatLng, layerGroup, LayerGroup, Map, Point} from "leaflet";
 
 import {ToggleButton, ToggleGroup} from "../../button";
-import {ImageOverlayConfig} from "../../config";
-import {Coordinates} from "../../config/coordinates";
+import {ImageInfo, ImageOverlayFeature} from "../../config";
 import {FileDownloader} from "../../file";
 import {CanvasWebGL, PointMapping, Projection} from "../../util";
-import {FeatureSet} from "../feature.set";
+
+import {EditableLayer} from "../editable.layer";
 import {ImageHandle} from "./image.handle";
 import {CornerNumber, TransformedImageOverlay} from "./transformed.image.overlay";
 
@@ -21,45 +21,39 @@ declare module "leaflet" {
 }
 
 /**
- * A feature set for displaying an image overlay
+ * An layer containing an editable image overlay
  */
-export class ImageFeatureSet extends FeatureSet {
+export class EditableImageOverlay extends TransformedImageOverlay implements EditableLayer {
 
-  private readonly layer: TransformedImageOverlay;
+  private readonly imageInfo: ImageInfo;
+
   private readonly handles: [ImageHandle, ImageHandle, ImageHandle, ImageHandle];
   private readonly handleGroup: LayerGroup;
+
+  private readonly controls: { [key: string]: Control.EasyButton } = {};
   private readonly toggleGroup: ToggleGroup;
-  private readonly draggable: Draggable;
+
+  private draggable: Draggable | null = null;
 
   /**
    * Create a new image overlay feature set
-   * @param config The config for this feature set
-   * @param map The map on which the feature set is displayed
+   * @param feature The GeoJson feature for this overlay, with a non-null image info
    */
-  constructor(protected readonly config: ImageOverlayConfig, private readonly map: Map) {
-    super(config);
+  constructor(feature: ImageOverlayFeature) {
+    super(feature.imageInfo!.getSrc(), GeoJSON.coordsToLatLngs(feature.geometry.coordinates, 1)[0].slice(0, 4));
 
-    // Create the image layer and set the coordinates of the corners
-    this.layer = new TransformedImageOverlay(config.imageInfo.getSrc(), this.calculateCorners());
-
-    // Add the layer to the map
-    this.layer.addTo(map);
+    // Store the image info
+    this.imageInfo = feature.imageInfo!;
 
     // Add corner handles
     this.handles = <[ImageHandle, ImageHandle, ImageHandle, ImageHandle]>
-      this.layer.getCorners().map((latlng, corner) => new ImageHandle(this, <CornerNumber>corner, latlng));
+      this.getCorners().map((latlng, corner) => new ImageHandle(this, <CornerNumber>corner, latlng));
     this.handleGroup = layerGroup(this.handles);
-
-    // Make draggable
-    this.draggable = new Draggable(this.layer.getElement()!);
-    this.draggable._updatePosition = () => {
-      this.move(this.map.latLngToLayerPoint(this.layer.getCorners()[0]), this.draggable._newPos);
-    };
 
     // Add controls
     this.controls.opacity = new ToggleButton(
       "fas fa-adjust",
-      active => this.layer.setOpacity(active ? 0.65 : 1),
+      active => this.setOpacity(active ? 0.65 : 1),
       "Make image transparent [T]", "Make image opaque [T]", "t"
     );
 
@@ -93,36 +87,35 @@ export class ImageFeatureSet extends FeatureSet {
   }
 
   /**
-   * Load the previously configured corner coordinates or calculate them based on the current map view
+   * Set initial corners when added to the map
    */
-  private calculateCorners(): [LatLng, LatLng, LatLng, LatLng] {
-    if (this.config.corners) {
-      // Reuse previously configured corners
-      return [
-        latLng(this.config.corners[0]),
-        latLng(this.config.corners[1]),
-        latLng(this.config.corners[2]),
-        latLng(this.config.corners[3])
-      ]
+  onAdd(map: Map): this {
+    if (!this.cornersValid()) {
+      // Place the image in the center of the current map view
+      const mapSize = map.getSize(),
+        imgWidth = this.imageInfo.width,
+        imgHeight = this.imageInfo.height,
+        minPadding = 2 * 100,
+        factor = Math.max(imgWidth / (mapSize.x - minPadding), imgHeight / (mapSize.y - minPadding), 1),
+        offsetX = (mapSize.x - imgWidth / factor) / 2,
+        offsetY = (mapSize.y - imgHeight / factor) / 2,
+        left = offsetX, right = mapSize.x - offsetX,
+        top = offsetY, bottom = mapSize.y - offsetY;
+
+      this.handles[0].latlng = this._map.containerPointToLatLng([left, top]);
+      this.handles[1].latlng = this._map.containerPointToLatLng([right, top]);
+      this.handles[2].latlng = this._map.containerPointToLatLng([right, bottom]);
+      this.handles[3].latlng = this._map.containerPointToLatLng([left, bottom]);
     }
 
-    // Place the image in the center of the current map view
-    const mapSize = this.map.getSize(),
-      imgWidth = this.config.imageInfo.width,
-      imgHeight = this.config.imageInfo.height,
-      minPadding = 2 * 100,
-      factor = Math.max(imgWidth / (mapSize.x - minPadding), imgHeight / (mapSize.y - minPadding), 1),
-      offsetX = (mapSize.x - imgWidth / factor) / 2,
-      offsetY = (mapSize.y - imgHeight / factor) / 2,
-      left = offsetX, right = mapSize.x - offsetX,
-      top = offsetY, bottom = mapSize.y - offsetY;
+    // Make draggable
+    this.draggable = new Draggable(this.getElement()!);
+    this.draggable._updatePosition = () => {
+      this.move(this._map.latLngToLayerPoint(this.getCorners()[0]), this.draggable!._newPos);
+    };
 
-    return [
-      this.map.containerPointToLatLng([left, top]),
-      this.map.containerPointToLatLng([right, top]),
-      this.map.containerPointToLatLng([left, bottom]),
-      this.map.containerPointToLatLng([right, bottom])
-    ];
+    this.updateLayer();
+    return super.onAdd(map);
   }
 
   /**
@@ -130,13 +123,17 @@ export class ImageFeatureSet extends FeatureSet {
    * @param mode The new mode, or null to disable editing
    */
   private setMode(mode: string | null) {
+    if (!this._map) {
+      return;
+    }
+
     let dragging = false;
     switch (mode) {
       case "scale":
       case "rotate":
       case "distort":
         this.handles.forEach(c => c.setMode(mode));
-        this.handleGroup.addTo(this.map);
+        this.handleGroup.addTo(this._map);
         this.setHandleAngles();
         break;
       case "move":
@@ -150,13 +147,13 @@ export class ImageFeatureSet extends FeatureSet {
 
     // Make draggable only when "move" is selected
     if (dragging) {
-      this.draggable.enable();
-      DomUtil.addClass(this.layer.getElement()!, "leaflet-interactive");
-      this.layer.getElement()!.style.cursor = "move";
+      this.draggable!.enable();
+      DomUtil.addClass(this.getElement()!, "leaflet-interactive");
+      this.getElement()!.style.cursor = "move";
     } else {
-      this.draggable.disable();
-      DomUtil.removeClass(this.layer.getElement()!, "leaflet-interactive");
-      this.layer.getElement()!.style.cursor = "";
+      this.draggable!.disable();
+      DomUtil.removeClass(this.getElement()!, "leaflet-interactive");
+      this.getElement()!.style.cursor = "";
     }
   }
 
@@ -168,8 +165,8 @@ export class ImageFeatureSet extends FeatureSet {
   move(oldPos: Point, newPos: Point) {
     const delta = newPos.subtract(oldPos);
     this.handles.forEach(handle => {
-      const p = this.map.latLngToLayerPoint(handle.latlng).add(delta);
-      handle.latlng = this.map.layerPointToLatLng(p);
+      const p = this._map.latLngToLayerPoint(handle.latlng).add(delta);
+      handle.latlng = this._map.layerPointToLatLng(p);
     });
     this.updateLayer();
   }
@@ -180,14 +177,14 @@ export class ImageFeatureSet extends FeatureSet {
    * @param newPos The new position of a corner
    */
   scale(oldPos: LatLng, newPos: LatLng) {
-    const center = this.layer.getCenter()!,
-      oldRadius = center.distanceTo(this.map.latLngToLayerPoint(oldPos)),
-      newRadius = center.distanceTo(this.map.latLngToLayerPoint(newPos)),
+    const center = this.getCenter()!,
+      oldRadius = center.distanceTo(this._map.latLngToLayerPoint(oldPos)),
+      newRadius = center.distanceTo(this._map.latLngToLayerPoint(newPos)),
       scale = newRadius / oldRadius;
 
     this.handles.forEach(handle => {
-      const p = this.map.latLngToLayerPoint(handle.latlng).subtract(center).multiplyBy(scale).add(center);
-      handle.latlng = this.map.layerPointToLatLng(p);
+      const p = this._map.latLngToLayerPoint(handle.latlng).subtract(center).multiplyBy(scale).add(center);
+      handle.latlng = this._map.layerPointToLatLng(p);
     });
 
     this.updateLayer();
@@ -199,18 +196,18 @@ export class ImageFeatureSet extends FeatureSet {
    * @param newPos The new position of a corner
    */
   rotate(oldPos: LatLng, newPos: LatLng) {
-    const center = this.layer.getCenter()!,
-      oldAngle = this.calculateAngle(center, this.map.latLngToLayerPoint(oldPos)),
-      newAngle = this.calculateAngle(center, this.map.latLngToLayerPoint(newPos)),
+    const center = this.getCenter()!,
+      oldAngle = this.calculateAngle(center, this._map.latLngToLayerPoint(oldPos)),
+      newAngle = this.calculateAngle(center, this._map.latLngToLayerPoint(newPos)),
       angle = newAngle - oldAngle;
 
     this.handles.forEach(handle => {
-      const p = this.map.latLngToLayerPoint(handle.latlng).subtract(center),
+      const p = this._map.latLngToLayerPoint(handle.latlng).subtract(center),
         q = new Point(
           Math.cos(angle) * p.x - Math.sin(angle) * p.y,
           Math.sin(angle) * p.x + Math.cos(angle) * p.y
         ).add(center);
-      handle.latlng = this.map.layerPointToLatLng(q);
+      handle.latlng = this._map.layerPointToLatLng(q);
     });
 
     this.setHandleAngles();
@@ -225,7 +222,7 @@ export class ImageFeatureSet extends FeatureSet {
   updateCorner(corner: CornerNumber, newPos: LatLng) {
     this.handles[corner].latlng = newPos;
     this.setHandleAngles();
-    this.layer.setCorner(corner, newPos);
+    this.setCorner(corner, newPos);
   }
 
   /**
@@ -262,7 +259,7 @@ export class ImageFeatureSet extends FeatureSet {
    * Update the angles for each corner handle in order to display the icons in the correct orientation
    */
   private setHandleAngles() {
-    const c = this.handles.map(handle => this.map.latLngToLayerPoint(handle.latlng));
+    const c = this.handles.map(handle => this._map.latLngToLayerPoint(handle.latlng));
     this.handles[0].setAngle(this.calculateMidAngle(c[0], c[1], c[2]));
     this.handles[1].setAngle(this.calculateMidAngle(c[1], c[0], c[3]));
     this.handles[2].setAngle(this.calculateMidAngle(c[2], c[0], c[3]));
@@ -273,7 +270,15 @@ export class ImageFeatureSet extends FeatureSet {
    * Update all corners of the image overlay
    */
   private updateLayer() {
-    this.layer.setCorners(<[LatLng, LatLng, LatLng, LatLng]>this.handles.map(c => c.latlng));
+    this.setCorners(<[LatLng, LatLng, LatLng, LatLng]>this.handles.map(c => c.latlng));
+  }
+
+  /**
+   * Get additional buttons for image overlays
+   * TODO It is possible to have multiple overlays in one feature collection, which would each add their own controls
+   */
+  getControls(): Control.EasyButton[] {
+    return Object.values(this.controls);
   }
 
   /**
@@ -283,12 +288,11 @@ export class ImageFeatureSet extends FeatureSet {
   select(selected: boolean) {
     if (selected) {
       (<ToggleButton>this.controls.opacity).active = false;
-      this.layer.setOpacity(1);
-      this.layer.bringToFront();
-      this.map.fitBounds(this.layer.getBounds(), {padding: [30, 30]})
+      this.setOpacity(1);
+      this.bringToFront();
     } else {
       this.toggleGroup.active = null;
-      this.layer.setOpacity(0.65);
+      this.setOpacity(0.65);
     }
   }
 
@@ -298,19 +302,14 @@ export class ImageFeatureSet extends FeatureSet {
   remove() {
     this.handles.forEach(c => c.remove());
     this.handleGroup.remove();
-    this.layer.remove();
+    return super.remove();
   }
 
   /**
-   * Export the current image and config of this feature set
+   * Export the current image and config of this feature collection
    */
-  download() {
-    this.downloadImage();
-    this.downloadConfig();
-  }
-
-  private async downloadImage() {
-    const c = this.layer.getCorners().map(corner => this.map.latLngToLayerPoint(corner));
+  async download() {
+    const c = this.getCorners().map(corner => this._map.latLngToLayerPoint(corner));
 
     // Bounds of the currently displayed image
     const left = Math.min(c[0].x, c[1].x, c[2].x, c[3].x),
@@ -328,39 +327,50 @@ export class ImageFeatureSet extends FeatureSet {
     const transform = Projection.project2D(
       PointMapping.map(0, 0, target[0].x, target[0].y),
       PointMapping.map(1, 0, target[1].x, target[1].y),
-      PointMapping.map(0, 1, target[2].x, target[2].y),
-      PointMapping.map(1, 1, target[3].x, target[3].y),
+      PointMapping.map(0, 1, target[3].x, target[3].y),
+      PointMapping.map(1, 1, target[2].x, target[2].y),
     );
 
     // Scaling factor based on the currently displayed size in order to preserve the full resolution
     const factor = Math.max(
-      this.config.imageInfo.width / c[0].distanceTo(c[1]),
-      this.config.imageInfo.width / c[2].distanceTo(c[3]),
-      this.config.imageInfo.height / c[0].distanceTo(c[2]),
-      this.config.imageInfo.height / c[1].distanceTo(c[3])
+      this.imageInfo.width / c[0].distanceTo(c[1]),
+      this.imageInfo.width / c[2].distanceTo(c[3]),
+      this.imageInfo.height / c[0].distanceTo(c[2]),
+      this.imageInfo.height / c[1].distanceTo(c[3])
     );
 
     // Render the file and download it
     const canvas = new CanvasWebGL(factor * width, factor * height);
-    canvas.drawImage(this.layer.getElement()!, transform);
-    new FileDownloader(`${this.name}.png`).setBlob(await canvas.getBlob()).download().destroy();
+    canvas.drawImage(this.getElement()!, transform);
+    new FileDownloader(this.generatedName()).setBlob(await canvas.getBlob()).download().destroy();
     canvas.destroy();
   }
 
   /**
-   * Download the JSON config file
+   * Export the JSON config data
    */
-  private downloadConfig() {
-    // Update the local config
-    this.config.corners = <[Coordinates, Coordinates, Coordinates, Coordinates]>
-      this.layer.getCorners().map(c => [c.lat, c.lng]);
-
-    const bounds = this.layer.getBounds();
-    this.config.bounds = [[bounds.getSouth(), bounds.getEast()], [bounds.getNorth(), bounds.getWest()]];
-
-    // Download the JSON file
-    const json = JSON.stringify(this.config);
-    new FileDownloader(`${this.name}.json`).setString(json).download().destroy();
+  toGeoJSON(): ImageOverlayFeature {
+    const bounds = this.getBounds();
+    return {
+      type: "Feature",
+      geometry: {
+        type: "Polygon",
+        coordinates: [GeoJSON.latLngsToCoords(this.getCorners(), 0, true)],
+        bbox: [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()]
+      },
+      properties: {
+        originalFile: this.imageInfo.name,
+        overlayFile: this.generatedName()
+      }
+    };
   }
 
+  private generatedName(): string {
+    const name = this.imageInfo.name
+      .replace(/\.[^.]+$/, "")
+      .replace(/[^a-z0-9]/gi, "_")
+      .toLowerCase();
+
+    return `${name}_generated.png`;
+  }
 }

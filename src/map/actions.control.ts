@@ -2,7 +2,7 @@ import {Control, ControlOptions, DomEvent, Map} from "leaflet";
 import "leaflet-easybutton";
 
 import {ActionButton, ControlButton} from "../button";
-import {FeatureSet} from "../feature-set";
+import {EditableFeatureCollection} from "../editable";
 import {GeotoolMap} from "./geotool.map";
 
 /**
@@ -24,7 +24,7 @@ declare module "leaflet" {
 }
 
 /**
- * This class displays control buttons for modifying feature sets
+ * This class displays control buttons for modifying feature collection
  */
 export class ActionsControl extends Control.EasyBar {
 
@@ -33,7 +33,7 @@ export class ActionsControl extends Control.EasyBar {
   private buttons: Control.EasyButton[];
   private buttonsAdded: boolean = false;
 
-  private selectedSet: FeatureSet | null = null;
+  private selectedCollection: EditableFeatureCollection | null = null;
 
   constructor(options?: ControlOptions) {
     // @ts-ignore The TS definition for the base constructor does not match the actual JS as of leaflet-easybutton 2.4.0
@@ -41,23 +41,23 @@ export class ActionsControl extends Control.EasyBar {
 
     // Create buttons which are only shown when a layer is selected
     this.buttons = [
-      new ActionButton("fa-sign-out-alt", () => this.unselectFeatureSet(), "Unselect feature set [Esc]", "Escape"),
-      new ActionButton("fa-edit", () => this.renameFeatureSet(), "Rename active feature set [N]", "n"),
-      new ActionButton("fa-trash-alt", () => this.deleteFeatureSet(), "Delete active feature set [Del]", "Delete"),
-      new ActionButton("fa-download", () => this.download(), "Export the active feature set [E]", "e"),
+      new ActionButton("fa-sign-out-alt", () => this.unselectFeatureCollection(), "Unselect feature collection [Esc]", "Escape"),
+      new ActionButton("fa-edit", () => this.renameFeatureCollection(), "Rename active feature collection [N]", "n"),
+      new ActionButton("fa-trash-alt", () => this.deleteFeatureCollection(), "Delete active feature collection [Del]", "Delete"),
+      new ActionButton("fa-download", () => this.download(), "Export the active feature collection [E]", "e"),
     ];
 
     DomEvent.on(document.body, "keydown", e => this.onKeyDown(e));
   }
 
   /**
-   * Add this control element to a map and set callbacks for selecting and deleting feature sets
+   * Add this control element to a map and set callbacks for selecting and deleting feature collections
    * @param map The map the controls are shown on
    */
   addTo(map: GeotoolMap): this {
     this.map = map;
-    this.map.addSelectCallback(f => this.afterFeatureSetSelected(f));
-    this.map.addDeleteCallback(f => this.afterFeatureSetDeleted(f));
+    this.map.addSelectCallback(f => this.afterFeatureCollectionSelected(f));
+    this.map.addDeleteCallback(f => this.afterFeatureCollectionDeleted(f));
     return super.addTo(map);
   }
 
@@ -76,90 +76,90 @@ export class ActionsControl extends Control.EasyBar {
   }
 
   /**
-   * Unselect the active feature set
+   * Unselect the active feature collection
    */
-  private unselectFeatureSet() {
+  private unselectFeatureCollection() {
     if (this.map) {
-      this.map.selectFeatureSet(null);
+      this.map.selectFeatureCollection(null);
     }
   }
 
   /**
-   * Rename the active feature set
+   * Rename the active feature collection
    */
-  private renameFeatureSet() {
-    if (!this.selectedSet) {
+  private renameFeatureCollection() {
+    if (!this.selectedCollection) {
       return;
     }
 
-    const newName = window.prompt("Enter a new name for the feature set:", this.selectedSet.name);
+    const newName = window.prompt("Enter a new name for the feature collection:", this.selectedCollection.name);
     if (newName) {
-      this.selectedSet.name = newName;
+      this.selectedCollection.name = newName;
       if (this.map) {
-        this.map.updateFeatureSet(this.selectedSet);
+        this.map.updateFeatureCollection(this.selectedCollection);
       }
     }
   }
 
   /**
-   * Delete the active feature set after asking for confirmation
+   * Delete the active feature collection after asking for confirmation
    */
-  private deleteFeatureSet() {
-    if (!this.selectedSet || !this.map) {
+  private deleteFeatureCollection() {
+    if (!this.selectedCollection || !this.map) {
       return;
     }
 
-    const response = window.confirm(`Do you really want to delete "${this.selectedSet.name}" completely?`);
+    const response = window.confirm(`Do you really want to delete "${this.selectedCollection.name}" completely?`);
     if (response) {
-      this.map.deleteFeatureSet(this.selectedSet);
+      this.map.deleteFeatureCollection(this.selectedCollection);
     }
   }
 
   /**
-   * Export the active feature set
+   * Export the active feature collection
    */
   private download() {
-    if (this.selectedSet) {
-      this.selectedSet.download();
+    if (this.selectedCollection) {
+      this.selectedCollection.download();
     }
   }
 
   /**
-   * Callback called by the map after a feature set has been selected
-   * @param featureSet The new active feature set, or null if none has been selected
+   * Callback called by the map after a feature collection has been selected
+   * @param featureCollection The new active feature collection, or null if none has been selected
    */
-  private afterFeatureSetSelected(featureSet: FeatureSet | null) {
-    if (featureSet === this.selectedSet) {
-      // Active feature set has not changed, do nothing
+  private afterFeatureCollectionSelected(featureCollection: EditableFeatureCollection | null) {
+    if (featureCollection === this.selectedCollection) {
+      // Active feature collection has not changed, do nothing
       return;
     }
 
-    if (this.selectedSet) {
-      // Remove the buttons of the previously active feature set
-      this.selectedSet.getControls().forEach(button => this.removeButton(button));
+    if (this.selectedCollection) {
+      // Remove the buttons of the previously active feature collection
+      this.selectedCollection.getControls().forEach(button => this.removeButton(button));
     }
 
-    if (featureSet) {
-      // Add buttons for the new active feature set
+    if (featureCollection) {
+      // Add buttons for the new active feature collection
       this.showButtons(true);
-      featureSet.getControls().forEach(button => this.addButton(button));
+      featureCollection.getControls().forEach(button => this.addButton(button));
     } else {
       // Remove all buttons
       this.showButtons(false);
     }
 
-    // Set the new active feature set
-    this.selectedSet = featureSet;
+    // Set the new active feature collection
+    this.selectedCollection = featureCollection;
   }
 
   /**
-   * Callback called by the map after a feature set has been deleted
-   * @param featureSet The deleted feature set
+   * Callback called by the map after a feature collection has been deleted
+   * @param featureCollection The deleted feature collection
    */
-  private afterFeatureSetDeleted(featureSet: FeatureSet) {
-    if (featureSet === this.selectedSet) {
-      // Feature set was active, so unselect it
-      this.afterFeatureSetSelected(null);
+  private afterFeatureCollectionDeleted(featureCollection: EditableFeatureCollection) {
+    if (featureCollection === this.selectedCollection) {
+      // Feature collection was active, so unselect it
+      this.afterFeatureCollectionSelected(null);
     }
   }
 

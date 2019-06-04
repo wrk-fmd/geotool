@@ -1,6 +1,6 @@
 import {divIcon, LatLng, Marker} from "leaflet";
 
-import {ImageFeatureSet} from "./image.feature.set";
+import {EditableImageOverlay} from "./editable.image.overlay";
 import {CornerNumber} from "./transformed.image.overlay";
 
 export type ImageHandleMode = "scale" | "rotate" | "distort";
@@ -35,7 +35,7 @@ export class ImageHandle extends Marker {
    * @param corner The number of the corner (1..3)
    * @param latlng The initial position of the handle
    */
-  constructor(private readonly image: ImageFeatureSet, private readonly corner: CornerNumber, latlng: LatLng) {
+  constructor(private readonly image: EditableImageOverlay, private readonly corner: CornerNumber, latlng: LatLng) {
     super(latlng, {icon: ImageHandle.scaleIcon, draggable: true,});
 
     this.previousLatlng = latlng;
