@@ -39,6 +39,8 @@ export class ActionsControl extends Control.EasyBar {
     // @ts-ignore The TS definition for the base constructor does not match the actual JS as of leaflet-easybutton 2.4.0
     super([], options);
 
+    this.addButton(new ActionButton("fa-plus", () => this.createFeatureCollection(), "Create new feature collection [Ins]", "Insert"));
+
     // Create buttons which are only shown when a layer is selected
     this.buttons = [
       new ActionButton("fa-sign-out-alt", () => this.unselectFeatureCollection(), "Unselect feature collection [Esc]", "Escape"),
@@ -73,6 +75,16 @@ export class ActionsControl extends Control.EasyBar {
     this._buttons
       .filter(b => b instanceof ControlButton && b.getKey() === e.key)
       .forEach(b => (<ControlButton>b).onKeyDown());
+  }
+
+  private createFeatureCollection() {
+    if (this.map) {
+      this.map.addFeatureCollection({
+        type: "FeatureCollection",
+        features: [],
+        name: "New feature collection"
+      })
+    }
   }
 
   /**
