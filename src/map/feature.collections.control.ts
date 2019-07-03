@@ -2,6 +2,7 @@ import {Control, DomEvent, DomUtil} from "leaflet";
 import "leaflet-easybutton";
 
 import {EditableFeatureCollection} from "../editable";
+import {KeyEvents} from "../util";
 import {GeotoolMap} from "./geotool.map";
 
 /**
@@ -48,7 +49,7 @@ export class FeatureCollectionsControl extends Control {
    * @param e The keyboard event
    */
   private onKeyDown(e: Event) {
-    if (!(e instanceof KeyboardEvent) || !this.featureCollections.length || !this.map) {
+    if (!(e instanceof KeyboardEvent) || KeyEvents.isTextElement(e) || !this.featureCollections.length || !this.map) {
       return;
     }
 

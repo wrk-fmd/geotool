@@ -3,6 +3,7 @@ import "leaflet-easybutton";
 
 import {ActionButton, ControlButton} from "../button";
 import {EditableFeatureCollection} from "../editable";
+import {KeyEvents} from "../util";
 import {GeotoolMap} from "./geotool.map";
 
 /**
@@ -67,7 +68,7 @@ export class ActionsControl extends Control.EasyBar {
    * @param e The keyboard event
    */
   private onKeyDown(e: Event) {
-    if (!(e instanceof KeyboardEvent)) {
+    if (!(e instanceof KeyboardEvent) || KeyEvents.isTextElement(e)) {
       return;
     }
 

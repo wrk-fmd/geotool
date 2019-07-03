@@ -1,3 +1,5 @@
+export * from "./key.events";
+
 export * from "./matrix";
 export * from "./projection";
 
