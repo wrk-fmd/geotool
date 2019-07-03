@@ -35,9 +35,8 @@ export class FeatureCollectionsControl extends Control {
     this.featureCollections.forEach(item => this.addItem(item));
 
     // Attach callbacks to the map
-    this.map.addSelectCallback(f => this.afterFeatureCollectionSelected(f));
-    this.map.addDeleteCallback(f => this.afterFeatureCollectionDeleted(f));
-    this.map.addUpdateCallback(f => this.afterFeatureCollectionUpdated(f));
+    this.map.selectedCollection.subscribe(f => this.afterFeatureCollectionSelected(f));
+    this.map.deletedCollection.subscribe(f => this.afterFeatureCollectionDeleted(f));
 
     DomEvent.on(document.body, "keydown", e => this.onKeyDown(e));
 
@@ -195,20 +194,6 @@ export class FeatureCollectionsControl extends Control {
     if (!this.featureCollections.length && this.container) {
       DomUtil.removeClass(this.container, "leaflet-control-layers-expanded");
     }
-  }
-
-  /**
-   * Callback called by the map after a feature collection has been updated
-   * @param featureCollection The updated feature collection
-   */
-  private afterFeatureCollectionUpdated(featureCollection: EditableFeatureCollection) {
-    this.featureCollections
-      .filter(item => item.collection === featureCollection)
-      .forEach(item => {
-        if (item.name) {
-          item.name.innerText = featureCollection.name;
-        }
-      });
   }
 }
 

@@ -58,8 +58,7 @@ export class ActionsControl extends Control.EasyBar {
    */
   addTo(map: GeotoolMap): this {
     this.map = map;
-    this.map.addSelectCallback(f => this.afterFeatureCollectionSelected(f));
-    this.map.addDeleteCallback(f => this.afterFeatureCollectionDeleted(f));
+    this.map.selectedCollection.subscribe(f => this.afterFeatureCollectionSelected(f));
     return super.addTo(map);
   }
 
@@ -100,16 +99,8 @@ export class ActionsControl extends Control.EasyBar {
    * Rename the active feature collection
    */
   private renameFeatureCollection() {
-    if (!this.selectedCollection) {
-      return;
-    }
-
-    const newName = window.prompt("Enter a new name for the feature collection:", this.selectedCollection.name);
-    if (newName) {
-      this.selectedCollection.name = newName;
-      if (this.map) {
-        this.map.updateFeatureCollection(this.selectedCollection);
-      }
+    if (this.selectedCollection) {
+      // TODO
     }
   }
 
@@ -162,17 +153,6 @@ export class ActionsControl extends Control.EasyBar {
 
     // Set the new active feature collection
     this.selectedCollection = featureCollection;
-  }
-
-  /**
-   * Callback called by the map after a feature collection has been deleted
-   * @param featureCollection The deleted feature collection
-   */
-  private afterFeatureCollectionDeleted(featureCollection: EditableFeatureCollection) {
-    if (featureCollection === this.selectedCollection) {
-      // Feature collection was active, so unselect it
-      this.afterFeatureCollectionSelected(null);
-    }
   }
 
   /**

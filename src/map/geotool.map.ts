@@ -1,13 +1,11 @@
 import {control, latLngBounds, Map, tileLayer} from "leaflet";
+import {BehaviorSubject, Observable, Subject} from "rxjs";
 
 import {EditableFeatureCollection} from "../editable";
 import {FileListener} from "../file";
 import {NamedFeatureCollection} from "../geojson";
 import {ActionsControl} from "./actions.control";
 import {FeatureCollectionsControl} from "./feature.collections.control";
-
-export type FeatureCollectionSelectCallback = (featureCollection: EditableFeatureCollection | null) => void;
-export type FeatureCollectionChangeCallback = (featureCollection: EditableFeatureCollection) => void;
 
 /**
  * This class acts as an entry point to the application and displays the map and controls
@@ -22,11 +20,8 @@ export class GeotoolMap extends Map {
   private readonly controls: ActionsControl;
   private readonly featureCollections: FeatureCollectionsControl;
 
-  private selectedCollection: EditableFeatureCollection | null = null;
-
-  private selectCallbacks: FeatureCollectionSelectCallback[] = [];
-  private deleteCallbacks: FeatureCollectionChangeCallback[] = [];
-  private updateCallbacks: FeatureCollectionChangeCallback[] = [];
+  private readonly _selectedCollection = new BehaviorSubject<EditableFeatureCollection | null>(null);
+  private readonly _deletedCollection = new Subject<EditableFeatureCollection>();
 
   constructor(selector: string) {
     super(selector, {
@@ -66,6 +61,14 @@ export class GeotoolMap extends Map {
     this.getContainer().focus();
   }
 
+  get selectedCollection(): Observable<EditableFeatureCollection | null> {
+    return this._selectedCollection;
+  }
+
+  get deletedCollection(): Observable<EditableFeatureCollection> {
+    return this._deletedCollection;
+  }
+
   /**
    * Add a feature collection to the map
    * @param config The config object containing the relevant parameters for the feature collection
@@ -87,22 +90,13 @@ export class GeotoolMap extends Map {
     // Call the destruction logic of the feature collection
     featureCollection.remove();
 
-    if (featureCollection === this.selectedCollection) {
+    if (featureCollection === this._selectedCollection.value) {
       // Unselect the feature collection if it was active
-      this.selectedCollection = null;
+      this._selectedCollection.next(null);
     }
 
     // Trigger callbacks
-    this.deleteCallbacks.forEach(callback => callback(featureCollection));
-  }
-
-  /**
-   * Called when a feature collections's information has been updated
-   * @param featureCollection The feature collection that has been updated
-   */
-  updateFeatureCollection(featureCollection: EditableFeatureCollection) {
-    // Trigger callbacks
-    this.updateCallbacks.forEach(callback => callback(featureCollection));
+    this._deletedCollection.next(featureCollection);
   }
 
   /**
@@ -110,48 +104,22 @@ export class GeotoolMap extends Map {
    * @param featureCollection The selected feature collection, or null to unselect all feature collections
    */
   selectFeatureCollection(featureCollection: EditableFeatureCollection | null) {
-    if (featureCollection === this.selectedCollection) {
+    if (featureCollection === this._selectedCollection.value) {
       // Do nothing if the feature collection has been selected already
       return;
     }
 
-    if (this.selectedCollection) {
+    if (this._selectedCollection.value) {
       // Unselect the previously active feature collection
-      this.selectedCollection.select(false);
+      this._selectedCollection.value.select(false);
     }
 
-    this.selectedCollection = featureCollection;
-
     // Trigger callbacks
-    this.selectCallbacks.forEach(callback => callback(featureCollection));
+    this._selectedCollection.next(featureCollection);
 
     if (featureCollection) {
       // Mark the collection as selected
       featureCollection.select(true);
     }
-  }
-
-  /**
-   * Add a callback for whenever the selected feature collection changes
-   * @param callback A function called with the new active feature collection
-   */
-  addSelectCallback(callback: FeatureCollectionSelectCallback) {
-    this.selectCallbacks.push(callback);
-  }
-
-  /**
-   * Add a callback for whenever a feature collection is deleted
-   * @param callback A function called with the deleted feature collection
-   */
-  addDeleteCallback(callback: FeatureCollectionChangeCallback) {
-    this.deleteCallbacks.push(callback);
-  }
-
-  /**
-   * Add a callback for whenever a feature collection is updated
-   * @param callback A function called with the updated feature collection
-   */
-  addUpdateCallback(callback: FeatureCollectionChangeCallback) {
-    this.updateCallbacks.push(callback);
   }
 }
