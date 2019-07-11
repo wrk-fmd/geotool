@@ -1,0 +1,29 @@
+@mixin svg-marker($name, $svg-content) {
+  $start: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">';
+  $end: '</svg>';
+  .marker-#{$name}:before {
+    content: url("data:image/svg+xml;utf8, #{$start}#{$svg-content}#{$end}");
+  }
+}
+
+@function height($height) {
+  @return '<circle cx="12" cy="12" r="10" fill="white" stroke="red" stroke-width="4"/>' +
+      '<path d="M11 4h3L12 5z M11 20h3L12 19z" fill="black" stroke="black"/>' +
+      '<text x="5" y="14" font-family="Verdana" font-size="6">#{$height}m</text>';
+}
+
+@function danger() {
+  @return '<path d="M12 3L20 19L4 19z" r="10" fill="white" stroke="red" stroke-width="4" stroke-linecap="round"/>' +
+      '<text x="10" y="16" font-family="Verdana" font-size="10" font-weight="bold">!</text>';
+}
+
+@function redcross($fill, $stroke) {
+  @return '<path d="M8 0h8v8h8v8h-8v8h-8v-8h-8v-8h8z" fill="#{$fill}" stroke="#{$stroke}"/>';
+}
+
+@include svg-marker("height", height("??"));
+@include svg-marker("height-22", height("2,2"));
+@include svg-marker("height-27", height("2,7"));
+@include svg-marker("danger", danger());
+@include svg-marker("redcross", redcross("red", "red"));
+@include svg-marker("graycross", redcross("gray", "red"));

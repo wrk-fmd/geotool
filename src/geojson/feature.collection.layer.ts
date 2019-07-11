@@ -1,26 +1,25 @@
-import {Feature, GeoJsonObject, Point} from "geojson";
-import {FeatureGroup, GeoJSON, GeoJSONOptions, LatLng, Layer, Marker, Polyline, Polygon} from "leaflet";
+import {Feature, GeoJsonObject, LineString, MultiLineString, MultiPoint, MultiPolygon, Point, Polygon} from "geojson";
+import {FeatureGroup, GeoJSON, GeoJSONOptions, LatLng, Layer, Marker, Polyline, Polygon as LPolygon} from "leaflet";
 
 import {
   isFeature,
   isFeatureCollection,
   isGeometry,
-  isGeometryCollection,
-  isLineString,
-  isMultiLineString,
-  isMultiPoint,
-  isMultiPolygon,
-  isPoint,
-  isPolygon
+  isGeometryCollectionFeature,
+  isLineStringFeature,
+  isMultiLineStringFeature,
+  isMultiPointFeature,
+  isMultiPolygonFeature,
+  isPointFeature,
+  isPolygonFeature
 } from "./geojson.type.guards";
-
 
 /**
  * This class extends the default Leaflet GeoJSON implementation to allow overriding how each GeoJSON type is created
  */
 export class FeatureCollectionLayer extends GeoJSON {
 
-  constructor(geojson: GeoJsonObject, options?: GeoJSONOptions) {
+  constructor(geojson?: GeoJsonObject, options?: GeoJSONOptions) {
     super(geojson, Object.assign({style: {}}, options));
   }
 
@@ -80,43 +79,38 @@ export class FeatureCollectionLayer extends GeoJSON {
    * @return A layer or null, if either feature or geometry were empty
    */
   private geometryToLayer(feature: Feature | null): Layer | null {
-    if (!feature) {
-      return null;
-    }
-
-    const geometry = feature.geometry;
-    if (!geometry) {
+    if (!feature || !feature.geometry) {
       return null;
     }
 
     const coordsToLatLng = this.options && this.options.coordsToLatLng || GeoJSON.coordsToLatLng;
 
-    if (isPoint(geometry)) {
-      return this.pointToLayer(feature, coordsToLatLng(<[number, number]>geometry.coordinates));
+    if (isPointFeature(feature)) {
+      return this.pointToLayer(feature, coordsToLatLng(<[number, number]>feature.geometry.coordinates));
     }
 
-    if (isMultiPoint(geometry)) {
-      return this.multiPointToLayer(feature, GeoJSON.coordsToLatLngs(geometry.coordinates, 0, coordsToLatLng));
+    if (isMultiPointFeature(feature)) {
+      return this.multiPointToLayer(feature, GeoJSON.coordsToLatLngs(feature.geometry.coordinates, 0, coordsToLatLng));
     }
 
-    if (isLineString(geometry)) {
-      return this.lineToLayer(feature, GeoJSON.coordsToLatLngs(geometry.coordinates, 0, coordsToLatLng));
+    if (isLineStringFeature(feature)) {
+      return this.lineToLayer(feature, GeoJSON.coordsToLatLngs(feature.geometry.coordinates, 0, coordsToLatLng));
     }
 
-    if (isMultiLineString(geometry)) {
-      return this.multiLineToLayer(feature, GeoJSON.coordsToLatLngs(geometry.coordinates, 1, coordsToLatLng));
+    if (isMultiLineStringFeature(feature)) {
+      return this.multiLineToLayer(feature, GeoJSON.coordsToLatLngs(feature.geometry.coordinates, 1, coordsToLatLng));
     }
 
-    if (isPolygon(geometry)) {
-      return this.polygonToLayer(feature, GeoJSON.coordsToLatLngs(geometry.coordinates, 1, coordsToLatLng));
+    if (isPolygonFeature(feature)) {
+      return this.polygonToLayer(feature, GeoJSON.coordsToLatLngs(feature.geometry.coordinates, 1, coordsToLatLng));
     }
 
-    if (isMultiPolygon(geometry)) {
-      return this.multiPolygonToLayer(feature, GeoJSON.coordsToLatLngs(geometry.coordinates, 2, coordsToLatLng));
+    if (isMultiPolygonFeature(feature)) {
+      return this.multiPolygonToLayer(feature, GeoJSON.coordsToLatLngs(feature.geometry.coordinates, 2, coordsToLatLng));
     }
 
-    if (isGeometryCollection(geometry)) {
-      const layers = geometry.geometries.map(g => this.geometryToLayer({
+    if (isGeometryCollectionFeature(feature)) {
+      const layers = feature.geometry.geometries.map(g => this.geometryToLayer({
         type: "Feature",
         geometry: g,
         properties: feature.properties
@@ -133,9 +127,9 @@ export class FeatureCollectionLayer extends GeoJSON {
    * @param latlng The position of the point
    * @return A layer for this point
    */
-  protected pointToLayer(feature: Feature | null, latlng: LatLng): Layer {
+  protected pointToLayer(feature: Feature<Point>, latlng: LatLng): Layer {
     const pointToLayer = this.options && this.options.pointToLayer;
-    return pointToLayer ? pointToLayer(<Feature<Point>>feature, latlng) : new Marker(latlng);
+    return pointToLayer ? pointToLayer(feature, latlng) : new Marker(latlng);
   }
 
   /**
@@ -144,8 +138,14 @@ export class FeatureCollectionLayer extends GeoJSON {
    * @param latlngs The positions of the points
    * @return A layer containing all of the points
    */
-  protected multiPointToLayer(feature: Feature | null, latlngs: LatLng[]): Layer {
-    return new FeatureGroup(latlngs.map(p => this.pointToLayer(feature, p)));
+  protected multiPointToLayer(feature: Feature<MultiPoint>, latlngs: LatLng[]): Layer {
+    return new FeatureGroup(latlngs.map(p => this.pointToLayer({
+      ...feature,
+      geometry: {
+        type: 'Point',
+        coordinates: FeatureCollectionLayer.latLngToCoords(p)
+      }
+    }, p)));
   }
 
   /**
@@ -154,7 +154,7 @@ export class FeatureCollectionLayer extends GeoJSON {
    * @param latlngs The positions along the line
    * @return A layer containing the line
    */
-  protected lineToLayer(feature: Feature | null, latlngs: LatLng[]): Layer {
+  protected lineToLayer(feature: Feature<LineString>, latlngs: LatLng[]): Layer {
     return new Polyline(latlngs, this.options);
   }
 
@@ -164,7 +164,7 @@ export class FeatureCollectionLayer extends GeoJSON {
    * @param latlngs An array, where each item represents one line
    * @return A layer containing the line
    */
-  protected multiLineToLayer(feature: Feature | null, latlngs: LatLng[][]): Layer {
+  protected multiLineToLayer(feature: Feature<MultiLineString>, latlngs: LatLng[][]): Layer {
     return new Polyline(latlngs, this.options);
   }
 
@@ -174,8 +174,8 @@ export class FeatureCollectionLayer extends GeoJSON {
    * @param latlngs An array, where each item contains the corners of one area of the polygon
    * @return A layer containing the polygon
    */
-  protected polygonToLayer(feature: Feature | null, latlngs: LatLng[][]): Layer {
-    return new Polygon(latlngs, this.options);
+  protected polygonToLayer(feature: Feature<Polygon>, latlngs: LatLng[][]): Layer {
+    return new LPolygon(latlngs, this.options);
   }
 
   /**
@@ -184,7 +184,7 @@ export class FeatureCollectionLayer extends GeoJSON {
    * @param latlngs An array, where each item represents one polygon
    * @return A layer containing the polygons
    */
-  protected multiPolygonToLayer(feature: Feature | null, latlngs: LatLng[][][]): Layer {
-    return new Polygon(latlngs, this.options);
+  protected multiPolygonToLayer(feature: Feature<MultiPolygon>, latlngs: LatLng[][][]): Layer {
+    return new LPolygon(latlngs, this.options);
   }
 }

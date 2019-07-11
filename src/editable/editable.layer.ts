@@ -6,10 +6,20 @@ import {Control} from "leaflet";
  */
 export interface EditableLayer {
 
+  /**
+   * The additional buttons from each layer
+   */
   getControls(): Control.EasyButton[];
 
+  /**
+   * Called when the feature collection is (un)selected on the map
+   * @param selected Whether the feature collection is now selected or not
+   */
   select(selected: boolean): void;
 
+  /**
+   * Export the data of this feature set
+   */
   download(): void;
 
   toGeoJSON(): FeatureCollection | Feature | Geometry;

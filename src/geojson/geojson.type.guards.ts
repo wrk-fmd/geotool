@@ -27,6 +27,55 @@ export function isFeature(geojson: GeoJsonObject): geojson is Feature {
 }
 
 /**
+ * Check whether the GeoJson object is a point feature
+ */
+export function isPointFeature(geojson: GeoJsonObject): geojson is Feature<Point> {
+  return isFeature(geojson) && isPoint(geojson.geometry);
+}
+
+/**
+ * Check whether the GeoJson object is a multipoint feature
+ */
+export function isMultiPointFeature(geojson: GeoJsonObject): geojson is Feature<MultiPoint> {
+  return isFeature(geojson) && isMultiPoint(geojson.geometry);
+}
+
+/**
+ * Check whether the GeoJson object is a line feature
+ */
+export function isLineStringFeature(geojson: GeoJsonObject): geojson is Feature<LineString> {
+  return isFeature(geojson) && isLineString(geojson.geometry);
+}
+
+/**
+ * Check whether the GeoJson object is a multiline feature
+ */
+export function isMultiLineStringFeature(geojson: GeoJsonObject): geojson is Feature<MultiLineString> {
+  return isFeature(geojson) && isMultiLineString(geojson.geometry);
+}
+
+/**
+ * Check whether the GeoJson object is a polygon feature
+ */
+export function isPolygonFeature(geojson: GeoJsonObject): geojson is Feature<Polygon> {
+  return isFeature(geojson) && isPolygon(geojson.geometry);
+}
+
+/**
+ * Check whether the GeoJson object is a multipolygon feature
+ */
+export function isMultiPolygonFeature(geojson: GeoJsonObject): geojson is Feature<MultiPolygon> {
+  return isFeature(geojson) && isMultiPolygon(geojson.geometry);
+}
+
+/**
+ * Check whether the GeoJson object is a geometry collection feature
+ */
+export function isGeometryCollectionFeature(geojson: GeoJsonObject): geojson is Feature<GeometryCollection> {
+  return isFeature(geojson) && isGeometryCollection(geojson.geometry);
+}
+
+/**
  * Check whether the GeoJson object is a geometry object
  */
 export function isGeometry(geojson: GeoJsonObject): geojson is Geometry {

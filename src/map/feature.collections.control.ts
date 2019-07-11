@@ -1,3 +1,5 @@
+import {Subscription} from "rxjs";
+
 import {Control, DomEvent, DomUtil} from "leaflet";
 import "leaflet-easybutton";
 
@@ -111,11 +113,10 @@ export class FeatureCollectionsControl extends Control {
     DomEvent.on(input, 'click', () => this.onSelect(item.collection, input.checked));
 
     const name = DomUtil.create("span", "", label);
-    name.innerText = item.collection.name;
+    item.nameSubscription = item.collection.name.subscribe(value => name.innerText = value || "");
 
     item.element = label;
     item.input = input;
-    item.name = name;
   }
 
   /**
@@ -182,8 +183,11 @@ export class FeatureCollectionsControl extends Control {
     this.featureCollections
       .filter(item => item.collection === featureCollection)
       .forEach(item => {
+        if (item.nameSubscription) {
+          item.nameSubscription.unsubscribe();
+        }
         if (item.element) {
-          item.element.remove()
+          item.element.remove();
         }
       });
 
@@ -202,5 +206,5 @@ interface CollectionListEntry {
   collection: EditableFeatureCollection;
   element?: HTMLElement;
   input?: HTMLInputElement;
-  name?: HTMLElement;
+  nameSubscription?: Subscription;
 }

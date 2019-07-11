@@ -1,3 +1,4 @@
+export * from "./hash";
 export * from "./key.events";
 
 export * from "./matrix";

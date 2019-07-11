@@ -45,7 +45,7 @@ export class ActionsControl extends Control.EasyBar {
     // Create buttons which are only shown when a layer is selected
     this.buttons = [
       new ActionButton("fa-sign-out-alt", () => this.unselectFeatureCollection(), "Unselect feature collection [Esc]", "Escape"),
-      new ActionButton("fa-edit", () => this.renameFeatureCollection(), "Rename active feature collection [N]", "n"),
+      new ActionButton("fa-edit", () => this.editFeatureCollection(), "Edit active feature collection [N]", "n"),
       new ActionButton("fa-trash-alt", () => this.deleteFeatureCollection(), "Delete active feature collection [Del]", "Delete"),
       new ActionButton("fa-download", () => this.download(), "Export the active feature collection [E]", "e"),
     ];
@@ -99,9 +99,9 @@ export class ActionsControl extends Control.EasyBar {
   /**
    * Rename the active feature collection
    */
-  private renameFeatureCollection() {
+  private editFeatureCollection() {
     if (this.selectedCollection) {
-      // TODO
+      this.selectedCollection.edit();
     }
   }
 
@@ -113,7 +113,7 @@ export class ActionsControl extends Control.EasyBar {
       return;
     }
 
-    const response = window.confirm(`Do you really want to delete "${this.selectedCollection.name}" completely?`);
+    const response = window.confirm(`Do you really want to delete "${this.selectedCollection.name.value}" completely?`);
     if (response) {
       this.map.deleteFeatureCollection(this.selectedCollection);
     }
