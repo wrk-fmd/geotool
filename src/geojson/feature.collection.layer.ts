@@ -127,7 +127,7 @@ export class FeatureCollectionLayer extends GeoJSON {
    * @param latlng The position of the point
    * @return A layer for this point
    */
-  protected pointToLayer(feature: Feature<Point>, latlng: LatLng): Layer {
+  protected pointToLayer(feature: Feature<Point>, latlng: LatLng): Layer | null {
     const pointToLayer = this.options && this.options.pointToLayer;
     return pointToLayer ? pointToLayer(feature, latlng) : new Marker(latlng);
   }
@@ -138,14 +138,14 @@ export class FeatureCollectionLayer extends GeoJSON {
    * @param latlngs The positions of the points
    * @return A layer containing all of the points
    */
-  protected multiPointToLayer(feature: Feature<MultiPoint>, latlngs: LatLng[]): Layer {
+  protected multiPointToLayer(feature: Feature<MultiPoint>, latlngs: LatLng[]): Layer | null {
     return new FeatureGroup(latlngs.map(p => this.pointToLayer({
       ...feature,
       geometry: {
         type: 'Point',
         coordinates: FeatureCollectionLayer.latLngToCoords(p)
       }
-    }, p)));
+    }, p)).filter<Layer>((l: Layer | null): l is Layer => !!l));
   }
 
   /**
@@ -154,7 +154,7 @@ export class FeatureCollectionLayer extends GeoJSON {
    * @param latlngs The positions along the line
    * @return A layer containing the line
    */
-  protected lineToLayer(feature: Feature<LineString>, latlngs: LatLng[]): Layer {
+  protected lineToLayer(feature: Feature<LineString>, latlngs: LatLng[]): Layer | null {
     return new Polyline(latlngs, this.options);
   }
 
@@ -164,7 +164,7 @@ export class FeatureCollectionLayer extends GeoJSON {
    * @param latlngs An array, where each item represents one line
    * @return A layer containing the line
    */
-  protected multiLineToLayer(feature: Feature<MultiLineString>, latlngs: LatLng[][]): Layer {
+  protected multiLineToLayer(feature: Feature<MultiLineString>, latlngs: LatLng[][]): Layer | null {
     return new Polyline(latlngs, this.options);
   }
 
@@ -174,7 +174,7 @@ export class FeatureCollectionLayer extends GeoJSON {
    * @param latlngs An array, where each item contains the corners of one area of the polygon
    * @return A layer containing the polygon
    */
-  protected polygonToLayer(feature: Feature<Polygon>, latlngs: LatLng[][]): Layer {
+  protected polygonToLayer(feature: Feature<Polygon>, latlngs: LatLng[][]): Layer | null {
     return new LPolygon(latlngs, this.options);
   }
 
@@ -184,7 +184,7 @@ export class FeatureCollectionLayer extends GeoJSON {
    * @param latlngs An array, where each item represents one polygon
    * @return A layer containing the polygons
    */
-  protected multiPolygonToLayer(feature: Feature<MultiPolygon>, latlngs: LatLng[][][]): Layer {
+  protected multiPolygonToLayer(feature: Feature<MultiPolygon>, latlngs: LatLng[][][]): Layer | null {
     return new LPolygon(latlngs, this.options);
   }
 }

@@ -1,11 +1,21 @@
 import {control, latLngBounds, Map, tileLayer} from "leaflet";
 import {BehaviorSubject, Observable, Subject} from "rxjs";
+import "leaflet-editable";
 
 import {EditableFeatureCollection} from "../editable";
 import {FileListener} from "../file";
 import {NamedFeatureCollection} from "../geojson";
 import {ActionsControl} from "./actions.control";
 import {FeatureCollectionsControl} from "./feature.collections.control";
+
+/**
+ * Declare some types for leaflet-editable (the @types package is incompatible with the current Leaflet version)
+ */
+declare module "leaflet" {
+  interface MapOptions {
+    editable?: boolean;
+  }
+}
 
 /**
  * This class acts as an entry point to the application and displays the map and controls
@@ -26,7 +36,8 @@ export class GeotoolMap extends Map {
   constructor(selector: string) {
     super(selector, {
       center: [48.21, 16.37],
-      zoom: 15
+      zoom: 15,
+      editable: true
     });
 
     // Create and add base layers

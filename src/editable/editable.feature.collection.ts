@@ -1,6 +1,6 @@
 import {BehaviorSubject} from "rxjs";
 
-import {Feature, FeatureCollection, Point, Polygon} from "geojson";
+import {Feature, FeatureCollection, LineString, MultiLineString, Point, Polygon} from "geojson";
 import {Control, DomUtil, GeoJSON, LatLng, LeafletEvent, LeafletMouseEvent} from "leaflet";
 import "leaflet-easybutton";
 
@@ -13,6 +13,7 @@ import {FeatureCollectionLayer, NamedFeatureCollection} from "../geojson";
 import {EditableLayer, isEditableLayer} from "./editable.layer";
 import {EditableMarker, MarkerClasses, MarkerOptions} from "./marker";
 import {EditableImageOverlay} from "./image/editable.image.overlay";
+import {Track} from "./track/track";
 
 /**
  * This class adds editing features to the basic GeoJson layer group
@@ -53,7 +54,18 @@ export class EditableFeatureCollection extends FeatureCollectionLayer implements
   }
 
   protected pointToLayer(feature: Feature<Point>, latlng: LatLng) {
+    if (feature.properties && feature.properties.generated) {
+      return null;
+    }
     return new EditableMarker(feature, latlng, this.markerDefaults);
+  }
+
+  protected lineToLayer(feature: Feature<LineString>, latlngs: LatLng[]) {
+    return new Track(feature);
+  }
+
+  protected multiLineToLayer(feature: Feature<MultiLineString>, latlngs: LatLng[][]) {
+    return new Track(feature);
   }
 
   protected polygonToLayer(feature: Feature<Polygon>, latlngs: LatLng[][]) {
