@@ -14,7 +14,7 @@ export class Form {
 
   constructor(fields: FormField[]) {
     this.container = DomUtil.create("div");
-    fields.forEach(field => this.appendInput(field));
+    this.appendInputs(fields);
   }
 
   /**
@@ -23,6 +23,10 @@ export class Form {
   remove() {
     this.container.remove();
     this.subscriptions.forEach(s => s.unsubscribe());
+  }
+
+  appendInputs(fields: FormField[]) {
+    fields.forEach(field => this.appendInput(field));
   }
 
   private appendInput(field: FormField) {

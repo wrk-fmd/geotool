@@ -26,7 +26,7 @@ export class EditableFeatureCollection extends FeatureCollectionLayer implements
   private readonly createMarkerButton: ToggleButton;
 
   private readonly modal: Modal;
-  private readonly propertiesForm: Form;
+  protected readonly propertiesForm: Form;
   private readonly markerDefaults: MarkerOptions;
 
   constructor(featureCollection: NamedFeatureCollection) {

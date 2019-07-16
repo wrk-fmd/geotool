@@ -2,9 +2,9 @@ import {control, latLngBounds, Map, tileLayer} from "leaflet";
 import {BehaviorSubject, Observable, Subject} from "rxjs";
 import "leaflet-editable";
 
-import {EditableFeatureCollection} from "../editable";
+import {EditableFeatureCollection, Grid} from "../editable";
 import {FileListener} from "../file";
-import {NamedFeatureCollection} from "../geojson";
+import {isGridCollection, NamedFeatureCollection} from "../geojson";
 import {ActionsControl} from "./actions.control";
 import {FeatureCollectionsControl} from "./feature.collections.control";
 
@@ -12,6 +12,7 @@ import {FeatureCollectionsControl} from "./feature.collections.control";
  * Declare some types for leaflet-editable (the @types package is incompatible with the current Leaflet version)
  */
 declare module "leaflet" {
+  // noinspection JSUnusedGlobalSymbols
   interface MapOptions {
     editable?: boolean;
   }
@@ -86,7 +87,8 @@ export class GeotoolMap extends Map {
    */
   addFeatureCollection(config: NamedFeatureCollection) {
     // Create a new editable feature collection from the config object
-    const featureCollection = new EditableFeatureCollection(config).addTo(this);
+    const featureCollection = isGridCollection(config) ? new Grid(config) : new EditableFeatureCollection(config);
+    this.addLayer(featureCollection);
 
     // Add it to the feature collections control and immediately select it
     this.featureCollections.addFeatureCollection(featureCollection);

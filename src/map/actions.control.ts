@@ -3,6 +3,7 @@ import "leaflet-easybutton";
 
 import {ActionButton, ControlButton} from "../button";
 import {EditableFeatureCollection} from "../editable";
+import {GridFeatureCollection} from "../geojson";
 import {KeyEvents} from "../util";
 import {GeotoolMap} from "./geotool.map";
 
@@ -41,6 +42,7 @@ export class ActionsControl extends Control.EasyBar {
     super([], options);
 
     this.addButton(new ActionButton("fa-plus", () => this.createFeatureCollection(), "Create new feature collection [Ins]", "Insert"));
+    this.addButton(new ActionButton("fa-th", () => this.createGrid(), "Create new grid [G]", "g"));
 
     // Create buttons which are only shown when a layer is selected
     this.buttons = [
@@ -84,6 +86,24 @@ export class ActionsControl extends Control.EasyBar {
         features: [],
         name: "New feature collection"
       })
+    }
+  }
+
+  private createGrid() {
+    if (this.map) {
+      const bounds = this.map.getCenter().toBounds(30);
+      this.map.addFeatureCollection(<GridFeatureCollection>{
+        type: "FeatureCollection",
+        features: [],
+        name: "New grid",
+        grid: {
+          base: [bounds.getWest(), bounds.getNorth()],
+          right: [bounds.getEast() - bounds.getWest(), 0],
+          down: [0, bounds.getSouth() - bounds.getNorth()],
+          horizontal: ["A", "J"],
+          vertical: ["1", "10"]
+        }
+      });
     }
   }
 
