@@ -8,48 +8,58 @@ Austrian OpenData map and orthophoto are available as well as an OpenStreetMap l
 Drag the map to navigate, or use the arrow buttons (as long as the map is focused). Use the zoom
 tool in the top-left corner, the `+` and `-` keys, or the mousewheel for zooming.
 
-## Feature set types
+## Feature types
 
-A *feature set* is a group of multiple *features* like POIs that can be edited together.
+A *feature collection* is a group of multiple *features* like POIs that can be edited together.
+Those terms have the same meaning as in the [GeoJSON](https://en.wikipedia.org/wiki/GeoJSON) standard.
 
-The following types of feature sets are available:
+All GeoJSON types can be imported and then exported again.
+The following types of features can be created and edited:
 
-* Arbitrary list of POIs *(planned)*
-* Track with generated periodic markers for distances (e.g. per kilometer) *(planned)*
-* Grid markers *(planned)*
+* [Arbitrary list of POIs](poi.md)
+* [Track with generated periodic markers for distances](track.md) (e.g. per kilometer)
+* [Grid markers](grid.md)
 * [Image overlay](image.md)
 
-See the description of each type of feature set for specific usage.
+See the description of each type of feature for specific usage.
 
-## Feature set selector
+## Feature collection selector
 
-The list of added feature sets is shown in the bottom-left corner as soon as a feature set is added.
-Click the feature set to choose another set. You can also switch sets by using the `<` and `>` keys.
+The list of added feature collection is shown in the bottom-left corner as soon as a feature collection is added.
+Click the feature collection to choose another one. You can also switch collections by using the `<` and `>` keys.
 
-## Feature set controls
+## Feature collection controls
 
-The feature set controls are also shown in the bottom-left corner as soon as a set is selected.
+The feature collection controls are also shown in the bottom-left corner as soon as a collection is selected.
 You can also press the assigned keyboard shortcut.
 
+* <img src="icons/plus-solid.svg" height="20"/>
+  Create a new collection of arbitrary POIs.
+  Shortcut: <code>Ins</code>
+
+* <img src="icons/th-solid.svg" height="20"/>
+  Creat a new grid marker collection.
+  Shortcut: <code>G</code>
+
 * <img src="icons/sign-out-alt-solid.svg" height="20"/>
-  Unselect the currently selected feature set.
+  Unselect the currently selected feature collection.
   Shortcut: <code>Esc</code>
 
 * <img src="icons/edit-solid.svg" height="20"/>
-  Edit the name of the currently selected feature set.
+  Edit the currently selected feature collection.
   Shortcut: <code>N</code>
 
 * <img src="icons/trash-alt-solid.svg" height="20"/>
-  Delete the currently selected feature set permanently.
+  Delete the currently selected feature collection permanently.
   Shortcut: <code>Del</code>
 
 * <img src="icons/download-solid.svg" height="20"/>
-  Export the currently selected feature set.
-  Browsers sometimes block multiple successive downloads, so an exception for this has to be set.
+  Export the currently selected feature collection.
+  Browsers sometimes block multiple successive downloads, so an exception for this has to be added.
   Shortcut: <code>D</code>
 
-Additional controls are added based on the currently selected feature set type.
+Additional controls are added based on the currently selected feature collection.
 
-## Loading existing feature sets
+## Loading existing feature collection
 
-Existing feature sets can be loaded by dragging a single exported JSON config file onto the map.
+Existing feature collections can be loaded by dragging a single exported JSON config file onto the map.
