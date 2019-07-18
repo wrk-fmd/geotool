@@ -136,7 +136,7 @@ export class Grid extends EditableFeatureCollection {
 
   private removeMarker(marker: Marker | null) {
     if (marker) {
-      marker.remove();
+      this.removeLayer(marker);
     }
   }
 
