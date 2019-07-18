@@ -19,9 +19,14 @@ export class MarkerClasses {
   }
 
   private addStyleSheet(styleSheet: CSSStyleSheet) {
-    const rules = styleSheet.cssRules;
-    for (let i = 0; i < rules.length; i++) {
-      this.addRule(<CSSStyleRule>rules[i]);
+    try {
+      const rules = styleSheet.cssRules;
+      for (let i = 0; i < rules.length; i++) {
+        this.addRule(<CSSStyleRule>rules[i]);
+      }
+    } catch (e) {
+      // At least Chrome does not allow access to the rule if serving through the local filesystem
+      console.warn("Could not read CSS rules, CORS in effect?", e);
     }
   }
 
