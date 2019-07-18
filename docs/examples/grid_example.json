@@ -1,0 +1,123 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "text": "A1",
+        "icon": "text-marker",
+        "grid": [0, 0],
+        "generated": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [16.369798, 48.210135]
+      }
+    }, {
+      "type": "Feature",
+      "properties": {
+        "text": "A2",
+        "icon": "text-marker",
+        "grid": [0, 1],
+        "generated": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [16.369798, 48.209865]
+      }
+    }, {
+      "type": "Feature",
+      "properties": {
+        "text": "A3",
+        "icon": "text-marker",
+        "grid": [0, 2],
+        "generated": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [16.369798, 48.209596]
+      }
+    }, {
+      "type": "Feature",
+      "properties": {
+        "text": "B1",
+        "icon": "text-marker",
+        "grid": [1, 0],
+        "generated": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [16.370202, 48.210135]
+      }
+    }, {
+      "type": "Feature",
+      "properties": {
+        "text": "B2",
+        "icon": "text-marker",
+        "grid": [1, 1],
+        "generated": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [16.370202, 48.209865]
+      }
+    }, {
+      "type": "Feature",
+      "properties": {
+        "text": "B3",
+        "icon": "text-marker",
+        "grid": [1, 2],
+        "generated": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [16.370202, 48.209596]
+      }
+    }, {
+      "type": "Feature",
+      "properties": {
+        "text": "C1",
+        "icon": "text-marker",
+        "grid": [2, 0],
+        "generated": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [16.370607, 48.210135]
+      }
+    }, {
+      "type": "Feature",
+      "properties": {
+        "text": "C2",
+        "icon": "text-marker",
+        "grid": [2, 1],
+        "generated": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [16.370607, 48.209865]
+      }
+    }, {
+      "type": "Feature",
+      "properties": {
+        "text": "C3",
+        "icon": "text-marker",
+        "grid": [2, 2],
+        "generated": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [16.370607, 48.209596]
+      }
+    }
+  ],
+  "name": "New grid",
+  "markerDefaults": {},
+  "grid": {
+    "base": [16.369798, 48.210135],
+    "right": [0.000404, 0],
+    "down": [0, -0.000269],
+    "horizontal": ["A", "C"],
+    "vertical": ["1", "3"]
+  }
+}

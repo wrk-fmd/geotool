@@ -1,0 +1,78 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [16.354898, 48.213907], [16.361593, 48.214922], [16.363374, 48.211248], [16.370273, 48.215923],
+          [16.378899, 48.211376], [16.383705, 48.218154], [16.394091, 48.217181]
+        ]
+      }
+    }, {
+      "type": "Feature",
+      "properties": {
+        "text": "km0",
+        "icon": "text-marker",
+        "distance": 0,
+        "generated": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [16.354898, 48.213907]
+      }
+    }, {
+      "type": "Feature",
+      "properties": {
+        "text": "km1",
+        "icon": "text-marker",
+        "distance": 1000,
+        "generated": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [16.363959, 48.211644]
+      }
+    }, {
+      "type": "Feature",
+      "properties": {
+        "text": "km2",
+        "icon": "text-marker",
+        "distance": 2000,
+        "generated": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [16.373795, 48.214066]
+      }
+    }, {
+      "type": "Feature",
+      "properties": {
+        "text": "km3",
+        "icon": "text-marker",
+        "distance": 3000,
+        "generated": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [16.381885, 48.215587]
+      }
+    }, {
+      "type": "Feature",
+      "properties": {
+        "text": "km4",
+        "icon": "text-marker",
+        "distance": 4000,
+        "generated": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [16.392852, 48.217297]
+      }
+    }
+  ],
+  "name": "Track Example",
+  "markerDefaults": {}
+}

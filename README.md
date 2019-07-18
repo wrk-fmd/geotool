@@ -28,6 +28,7 @@ running it from the local filesystem is enough.
 ## Usage
 
 Usage instructions can be found in the [manual](docs/MANUAL.md).
+A [technical description of the extended GeoJSON format](docs/geojson.md) is also available. 
 
 ## License
 

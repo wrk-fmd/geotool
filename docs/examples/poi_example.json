@@ -1,0 +1,53 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [16.355767, 48.214808]
+      },
+      "properties": {
+        "text": "Default values"
+      }
+    }, {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [16.372461, 48.214551]
+      },
+      "properties": {
+        "text": "Icon and anchor back to initial default, separate color",
+        "color": "#df2cd3",
+        "icon": "fa-map-marker-alt",
+        "vAnchor": "0"
+      }
+    }, {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [16.359801, 48.210004]
+      },
+      "properties": {
+        "text": "Custom icon",
+        "icon": "marker-danger"
+      }
+    }, {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [16.363835, 48.213235]
+      },
+      "properties": {
+        "text": "Color back to initial default",
+        "color": "#000000"
+      }
+    }
+  ],
+  "name": "POI Example",
+  "markerDefaults": {
+    "color": "#4000ff",
+    "icon": "fa-plus",
+    "vAnchor": "-0.5"
+  }
+}
