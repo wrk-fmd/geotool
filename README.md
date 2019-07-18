@@ -38,4 +38,6 @@ The core of the application is based on [Leaflet](https://github.com/Leaflet/Lea
 Both the application and documentation use [Font Awesome](https://github.com/FortAwesome/Font-Awesome),
 available under the MIT license.
 
+Parts of the application use [Bootstrap](https://getbootstrap.com), available under the MIT license.
+
 Some code is based on [glMatrix](https://github.com/toji/gl-matrix), available under the MIT license.
