@@ -97,7 +97,7 @@ export class EditableMarker extends Marker implements EditableLayer {
       const icon = el.firstChild;
 
       // Set the color and style of the icon
-      icon.style.color = this.color || null;
+      icon.style.color = this.color || "";
       icon.className = `fas fa-2x ${this.icon || "fa-map-marker-alt"}`;
 
       // Set the offset for the icon, which is given relative to bottom center

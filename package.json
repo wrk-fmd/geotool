@@ -1,6 +1,6 @@
 {
   "name": "geotool",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "This tool helps with creating layers for Leaflet maps.",
   "main": "index.js",
   "scripts": {
@@ -12,25 +12,25 @@
   "author": "WRK/FMD",
   "license": "MIT",
   "devDependencies": {
-    "@types/leaflet": "^1.4.6",
-    "@types/node": "^12.6.8",
-    "css-loader": "^3.1.0",
-    "file-loader": "^4.1.0",
-    "html-webpack-plugin": "^3.2.0",
-    "mini-css-extract-plugin": "^0.8.0",
-    "node-sass": "^4.12.0",
-    "sass-loader": "^7.1.0",
-    "ts-loader": "^6.0.4",
-    "typescript": "^3.5.3",
-    "webpack": "^4.36.1",
-    "webpack-cli": "^3.3.6"
+    "@types/leaflet": "^1.5.12",
+    "@types/node": "^13.11.0",
+    "css-loader": "^3.4.2",
+    "file-loader": "^6.0.0",
+    "html-webpack-plugin": "^4.0.4",
+    "mini-css-extract-plugin": "^0.9.0",
+    "node-sass": "^4.13.1",
+    "sass-loader": "^8.0.2",
+    "ts-loader": "^6.2.2",
+    "typescript": "^3.8.3",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^5.9.0",
-    "bootstrap": "^4.3.1",
-    "leaflet": "^1.5.1",
+    "@fortawesome/fontawesome-free": "^5.13.0",
+    "bootstrap": "^4.4.1",
+    "leaflet": "^1.6.0",
     "leaflet-easybutton": "^2.4.0",
     "leaflet-editable": "^1.2.0",
-    "rxjs": "^6.5.2"
+    "rxjs": "^6.5.5"
   }
 }
