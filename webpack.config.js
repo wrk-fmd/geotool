@@ -12,7 +12,16 @@ module.exports = {
       },
       {
         test: /\.s?css$/,
-        use: [MiniCssExtractPlugin.loader, "css-loader", "sass-loader"],
+        use: [MiniCssExtractPlugin.loader, "css-loader", {
+          loader: "sass-loader",
+          options: {
+            sassOptions: {
+              // SASS prints a lot of deprecation warnings for Bootstrap now,
+              // but hiding them is probably not a good idea in the long run
+              quietDeps: true
+            }
+          }
+        }],
       },
       {
         test: /\.(png|jpg|gif|svg|ttf|woff2?|eot)$/,
@@ -35,5 +44,9 @@ module.exports = {
       template: "./src/index.html",
     }),
     new MiniCssExtractPlugin({})
-  ]
+  ],
+  performance: {
+    maxAssetSize: 1048576,
+    maxEntrypointSize: 524288,
+  },
 };
