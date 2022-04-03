@@ -1,0 +1,17 @@
+# Ignore node modules
+**/node_modules
+
+# Ignore built output
+**/dist
+
+# Ignore docs
+**/docs
+
+# Ignore .git
+**/.git
+**/.github
+**/.gitignore
+
+# Ignore IDE config
+**/.idea
+**/*.iml
