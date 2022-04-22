@@ -39,14 +39,13 @@ export class EditableMarker extends Marker implements EditableLayer {
 
     // Create the form for the popup
     this.propertiesForm = new Form([
-      {label: "Text", data: this.markerOptions.text},
+      {label: "Text", type: "textarea", rows: 3, data: this.markerOptions.text},
       {label: "Color", type: "color", data: this.markerOptions.color},
       {label: "Icon", list: MarkerClasses.instance.list, data: this.markerOptions.icon},
       {label: "Hor anchor", type: "range", min: -0.5, max: 0.5, step: 0.25, data: this.markerOptions.hAnchor},
       {label: "Vert anchor", type: "range", min: -1, max: 0, step: 0.25, data: this.markerOptions.vAnchor}
     ]);
-    this.propertiesForm.container.style.minWidth = "260px";
-    this.bindPopup(popup().setContent(this.propertiesForm.container));
+    this.bindPopup(popup({minWidth: 350}).setContent(this.propertiesForm.container));
 
     // Subscribe to changes in the options
     this.subscribeOption(options => options.color, value => this.color = value);

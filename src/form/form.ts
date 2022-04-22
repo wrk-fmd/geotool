@@ -44,6 +44,10 @@ export class Form {
     switch (field.type) {
       case "textarea":
         input = document.createElement("textarea");
+
+        if (field.rows !== undefined) {
+          input.rows = field.rows;
+        }
         break;
       case "color":
         input = document.createElement("input");
@@ -123,6 +127,9 @@ export interface FormField {
 
   /** The step for numeric inputs */
   step?: number;
+
+  /** The default number of rows for textarea inputs */
+  rows?: number;
 
   /** The subject, which is triggered when the value is changed */
   data: Subject<string | null>;
