@@ -6,6 +6,7 @@ import "leaflet-easybutton";
 
 import {ToggleButton} from "../button";
 import {isImageOverlayFeature} from "../config";
+import {Csv, OV2} from "../export";
 import {FileDownloader} from "../file";
 import {Form, Modal} from "../form";
 import {FeatureCollectionLayer, NamedFeatureCollection} from "../geojson";
@@ -18,7 +19,7 @@ import {Track} from "./track/track";
 /**
  * This class adds editing features to the basic GeoJson layer group
  */
-export class EditableFeatureCollection extends FeatureCollectionLayer implements EditableLayer {
+export class EditableFeatureCollection extends FeatureCollectionLayer implements EditableLayer, Csv.SupportsCsv, OV2.SupportsOV2 {
 
   /** The displayed name of this feature collection */
   name: BehaviorSubject<string | null>;
@@ -133,10 +134,26 @@ export class EditableFeatureCollection extends FeatureCollectionLayer implements
     // Call specific download methods for each layer
     this.eachEditableLayer(layer => layer.download());
 
+    // Build export filename
+    const name = String(this.name.getValue()).replace(/[^a-z0-9]/gi, "_").toLowerCase();
+
     // Export the GeoJson for the layer
-    const json = JSON.stringify(this.toGeoJSON()),
-      name = String(this.name.getValue()).replace(/[^a-z0-9]/gi, "_").toLowerCase();
+    const json = JSON.stringify(this.toGeoJSON());
     new FileDownloader(`${name}.json`).setString(json).download().destroy();
+
+    // Export the CSV file for the layer
+    const csv = this.toCSV();
+    if (csv.length) {
+      new FileDownloader(`${name}.csv`)
+        .setString(Csv.serializeCsv(csv), 'application/csv')
+        .download().destroy();
+    }
+
+    // Export the OV2 file for the layer
+    const ov2 = this.toOV2();
+    if (ov2 && ov2.size) {
+      new FileDownloader(`${name}.ov2`).setBlob(ov2).download().destroy();
+    }
   }
 
   toGeoJSON(): NamedFeatureCollection {
@@ -145,6 +162,14 @@ export class EditableFeatureCollection extends FeatureCollectionLayer implements
       name: this.name.value || "",
       markerDefaults: this.markerDefaults.getValues()
     };
+  }
+
+  toCSV(): Csv.CsvRecord[] {
+    return Csv.mapGroup(this);
+  }
+
+  toOV2(): Blob | null {
+    return OV2.mapGroup(this);
   }
 
   private eachEditableLayer(fn: (layer: EditableLayer) => void) {

@@ -4,6 +4,7 @@ import {Control, featureGroup, FeatureGroup, GeoJSON, LatLng, polyline, Polyline
 import "leaflet-editable";
 
 import {ToggleButton} from "../../button";
+import {Csv, OV2} from "../../export";
 import {isMultiLineString} from "../../geojson";
 import {EditableLayer} from "../editable.layer";
 import {DistanceMarker} from "./distance.marker";
@@ -24,7 +25,7 @@ declare module 'leaflet' {
 /**
  * A layer containing an editable track
  */
-export class Track extends FeatureGroup implements EditableLayer {
+export class Track extends FeatureGroup implements EditableLayer, Csv.SupportsCsv, OV2.SupportsOV2 {
 
   private resolution: number = 1000;
 
@@ -193,5 +194,16 @@ export class Track extends FeatureGroup implements EditableLayer {
         ...(<FeatureCollection>this.markers.toGeoJSON()).features
       ]
     };
+  }
+
+  toCSV(): Csv.CsvRecord[] {
+    return [
+      Csv.getLineRecord(<LatLng[] | LatLng[][]>this.track.getLatLngs(), '', 'Track'),
+      ...Csv.mapGroup(this.markers)
+    ]
+  }
+
+  toOV2(): Blob | null {
+    return OV2.mapGroup(this.markers);
   }
 }

@@ -1,10 +1,12 @@
 import {Feature, Point} from "geojson";
 import {divIcon, LatLngExpression, Marker} from "leaflet";
 
+import {Csv, OV2} from "../../export";
+
 /**
  * This class displays a distance marker on a track
  */
-export class DistanceMarker extends Marker {
+export class DistanceMarker extends Marker implements Csv.SupportsCsv, OV2.SupportsOV2 {
 
   constructor(private readonly distance: number, latlng: LatLngExpression) {
     super(latlng, {
@@ -21,7 +23,7 @@ export class DistanceMarker extends Marker {
     return {
       ...super.toGeoJSON(),
       properties: {
-        text: `km${this.distance / 1000}`,
+        text: this.options.title,
         icon: "text-marker",
         distance: this.distance,
         generated: true
@@ -29,4 +31,11 @@ export class DistanceMarker extends Marker {
     }
   }
 
+  toCSV(): Csv.CsvRecord[] {
+    return [Csv.getPointRecord(this.getLatLng(), this.options.title!, 'Distance')];
+  }
+
+  toOV2(): Blob {
+    return OV2.simpleRecord(this.getLatLng(), this.options.title!);
+  }
 }

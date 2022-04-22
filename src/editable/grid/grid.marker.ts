@@ -1,11 +1,13 @@
 import {Feature, Point} from "geojson";
 import {divIcon, LatLngExpression, Marker} from "leaflet";
+
+import {Csv, OV2} from "../../export";
 import {EditableLayer} from "../editable.layer";
 
 /**
  * This class displays a marker on a grid
  */
-export class GridMarker extends Marker implements EditableLayer {
+export class GridMarker extends Marker implements EditableLayer, Csv.SupportsCsv, OV2.SupportsOV2 {
 
   /**
    * Create a new grid marker
@@ -67,4 +69,11 @@ export class GridMarker extends Marker implements EditableLayer {
     }
   }
 
+  toCSV(): Csv.CsvRecord[] {
+    return [Csv.getPointRecord(this.getLatLng(), this.text, 'Grid')];
+  }
+
+  toOV2(): Blob {
+    return OV2.simpleRecord(this.getLatLng(), this.text);
+  }
 }

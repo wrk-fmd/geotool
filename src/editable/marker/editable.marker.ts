@@ -4,6 +4,7 @@ import {map} from "rxjs/operators";
 import {Feature, Point} from "geojson";
 import {Control, divIcon, LatLngExpression, Map, Marker, popup} from "leaflet";
 
+import {Csv, OV2} from "../../export";
 import {Form} from "../../form";
 import {Hash} from "../../util";
 import {EditableLayer} from "../editable.layer";
@@ -13,7 +14,7 @@ import {MarkerOptions} from "./marker.options";
 /**
  * This class adds editing features to the basic Leaflet Marker
  */
-export class EditableMarker extends Marker implements EditableLayer {
+export class EditableMarker extends Marker implements EditableLayer, Csv.SupportsCsv, OV2.SupportsOV2 {
 
   private readonly propertiesForm: Form;
   private readonly markerOptions: MarkerOptions;
@@ -88,6 +89,14 @@ export class EditableMarker extends Marker implements EditableLayer {
       ...super.toGeoJSON(),
       properties: this.markerOptions.getValues()
     };
+  }
+
+  toCSV(): Csv.CsvRecord[] {
+    return [Csv.getPointRecord(this.getLatLng(), this.markerOptions.text.value || '', '')];
+  }
+
+  toOV2(): Blob {
+    return OV2.simpleRecord(this.getLatLng(), this.markerOptions.text.value || '');
   }
 
   private updateMarker() {
