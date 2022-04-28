@@ -25,12 +25,9 @@ module.exports = {
       },
       {
         test: /\.(png|jpg|gif|svg|ttf|woff2?|eot)$/,
-        use: {
-          loader: "file-loader",
-          options: {
-            name: "[name].[ext]",
-            outputPath: "assets"
-          }
+        type: "asset/resource",
+        generator: {
+          filename: "assets/[name][ext][query]"
         }
       }
     ]
