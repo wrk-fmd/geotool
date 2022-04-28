@@ -29,17 +29,16 @@
 @include svg-marker("graycross", redcross("gray", "red"));
 
 .text-marker {
-  width: auto !important;
-  height: auto !important;
+  display: inline-block;
   padding: 0 5px;
   white-space: nowrap;
   background: #fff;
+  color: #003063;
   border-radius: 6px;
+  transform: translate(-50%, -50%);
+  font-size: 11px;
 
   &:after {
-    display: block;
     content: attr(title);
-    color: #003063;
-    font-size: 11px
   }
 }

@@ -18,12 +18,12 @@ export class GridMarker extends Marker implements EditableLayer, Csv.SupportsCsv
    */
   constructor(private text: string, private readonly i: number, private readonly j: number, latlng: LatLngExpression) {
     super(latlng, {
-      title: text,
       riseOnHover: true,
       draggable: true,
       icon: divIcon({
-        className: "text-marker",
-        iconSize: [32, 16]
+        className: "",
+        iconSize: undefined,
+        html: `<span class="text-marker" title="${text}"></span>`,
       })
     });
   }
@@ -35,8 +35,8 @@ export class GridMarker extends Marker implements EditableLayer, Csv.SupportsCsv
   setText(text: string) {
     this.text = text;
     const el = this.getElement();
-    if (el) {
-      el.title = text;
+    if (el && el.firstChild instanceof HTMLElement) {
+      el.firstChild.title = text;
     }
   }
 

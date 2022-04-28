@@ -10,11 +10,11 @@ export class DistanceMarker extends Marker implements Csv.SupportsCsv, OV2.Suppo
 
   constructor(private readonly distance: number, latlng: LatLngExpression) {
     super(latlng, {
-      title: `km${distance / 1000}`,
       riseOnHover: true,
       icon: divIcon({
-        className: "text-marker",
-        iconSize: [32, 16]
+        className: "",
+        iconSize: undefined,
+        html: `<span class="text-marker" title="km${distance / 1000}"></span>`,
       })
     });
   }

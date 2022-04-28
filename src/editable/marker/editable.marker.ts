@@ -31,7 +31,8 @@ export class EditableMarker extends Marker implements EditableLayer, Csv.Support
       draggable: true,
       icon: divIcon({
         className: "",
-        html: '<i></i>'
+        iconSize: undefined,
+        html: '<span></span>'
       })
     });
 
@@ -109,11 +110,9 @@ export class EditableMarker extends Marker implements EditableLayer, Csv.Support
       icon.className = `fas fa-2x ${this.icon || "fa-map-marker-alt"}`;
 
       // Set the offset for the icon, which is given relative to bottom center
-      const left = this.hAnchor ? parseFloat(this.hAnchor) + 0.5 : 0.5,
-        top = this.vAnchor ? parseFloat(this.vAnchor) + 1 : 1;
-
-      el.style.marginTop = `-${top * icon.offsetHeight}px`;
-      el.style.marginLeft = `-${left * icon.offsetWidth}px`;
+      const left = this.hAnchor ? parseFloat(this.hAnchor) + 0.5 : 0.5;
+      const top = this.vAnchor ? parseFloat(this.vAnchor) + 1 : 1;
+      icon.style.transform = `translate(${-100 * left}%, ${-100 * top}%)`;
     }
   }
 
