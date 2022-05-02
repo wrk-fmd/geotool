@@ -6,7 +6,7 @@ import {Control, divIcon, LatLngExpression, Map, Marker, popup} from "leaflet";
 
 import {Csv, OV2} from "../../export";
 import {Form} from "../../form";
-import {Hash} from "../../util";
+import {MarkerProperties} from "../../geojson";
 import {EditableLayer} from "../editable.layer";
 import {MarkerClasses} from "./marker.classes";
 import {MarkerOptions} from "./marker.options";
@@ -85,7 +85,7 @@ export class EditableMarker extends Marker implements EditableLayer, Csv.Support
   download() {
   }
 
-  toGeoJSON(): Feature<Point, Hash<string>> {
+  toGeoJSON(): Feature<Point, MarkerProperties> {
     return {
       ...super.toGeoJSON(),
       properties: this.markerOptions.getValues()

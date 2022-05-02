@@ -24,7 +24,7 @@ export class FeatureCollectionLayer extends GeoJSON {
   }
 
   /**
-   * Add one ore more GeoJson objects to the layer
+   * Add one or more GeoJson objects to the layer
    * @param geojson The GeoJson data
    */
   addData(geojson: GeoJsonObject | GeoJsonObject[]) {
@@ -136,7 +136,7 @@ export class FeatureCollectionLayer extends GeoJSON {
    * Creates a layer for a MultiPoint geometry
    * @param feature The feature containing the multipoint
    * @param latlngs The positions of the points
-   * @return A layer containing all of the points
+   * @return A layer containing all the points
    */
   protected multiPointToLayer(feature: Feature<MultiPoint>, latlngs: LatLng[]): Layer | null {
     return new FeatureGroup(latlngs.map(p => this.pointToLayer({

@@ -1,5 +1,4 @@
 import {FeatureCollection, GeoJsonProperties, Geometry} from "geojson";
-import {Hash} from "../util";
 
 /**
  * This interface represents a GeoJSON feature collection with added properties
@@ -8,5 +7,15 @@ import {Hash} from "../util";
 export interface NamedFeatureCollection<G extends Geometry | null = Geometry, P = GeoJsonProperties>
   extends FeatureCollection<G, P> {
   name: string;
-  markerDefaults?: Hash<string>;
+  markerDefaults?: MarkerProperties;
+}
+
+export interface MarkerProperties {
+  text?: string;
+  titleTemplate?: string;
+  popupTemplate?: string;
+  color?: string;
+  icon?: string;
+  hAnchor?: string;
+  vAnchor?: string;
 }

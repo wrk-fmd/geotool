@@ -1,6 +1,6 @@
 import {BehaviorSubject} from "rxjs";
 
-import {Hash} from "../../util";
+import {MarkerProperties} from "../../geojson";
 
 /**
  * A class containing the options for a marker as Observables
@@ -22,7 +22,7 @@ export class MarkerOptions {
   /** The vertical anchor for the icon (as relative offset to the bottom) */
   readonly vAnchor: BehaviorSubject<string | null>;
 
-  constructor(defaults?: Hash<string>) {
+  constructor(defaults?: MarkerProperties) {
     defaults = defaults || {};
     this.text = new BehaviorSubject(defaults.text || null);
     this.color = new BehaviorSubject(defaults.color || null);
@@ -35,8 +35,8 @@ export class MarkerOptions {
    * Get the current values as a static object
    * @return A hash containing the current values, omitting unset values
    */
-  getValues(): Hash<any> {
-    const values: Hash<string> = {};
+  getValues(): MarkerProperties {
+    const values: MarkerProperties = {};
 
     if (this.text.value) {
       values.text = this.text.value;
