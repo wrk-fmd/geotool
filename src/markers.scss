@@ -28,17 +28,41 @@
 @include svg-marker("redcross", redcross("red", "red"));
 @include svg-marker("graycross", redcross("gray", "red"));
 
+.leaflet-marker-icon > span {
+  // Make sure the marker element is at the top of the container for anchors to be correct
+  vertical-align: top;
+  line-height: 0;
+}
+
 .text-marker {
   display: inline-block;
-  padding: 0 5px;
-  white-space: nowrap;
-  background: #fff;
-  color: #003063;
-  border-radius: 6px;
   transform: translate(-50%, -50%);
-  font-size: 11px;
+}
 
-  &:after {
-    content: attr(title);
+.text-markers-text {
+  // Text markers style if text should be visible
+  .text-marker {
+    padding: 0 5px;
+    background: #fff;
+    color: #003063;
+    border-radius: 6px;
+
+    &:after {
+      content: attr(title);
+      white-space: nowrap;
+      line-height: 1.5;
+      font-size: 11px;
+    }
+  }
+}
+
+.text-markers-dots {
+  // Text markers style if only dots should be visible
+  .text-marker {
+    width: 8px;
+    height: 8px;
+    background: currentColor;
+    color: #3388ff;
+    border-radius: 50%;
   }
 }

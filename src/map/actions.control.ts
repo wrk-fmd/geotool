@@ -1,7 +1,7 @@
 import {Control, ControlOptions, DomEvent, Map} from "leaflet";
 import "leaflet-easybutton";
 
-import {ActionButton, ControlButton} from "../button";
+import {ActionButton, ControlButton, ToggleButton} from "../button";
 import {EditableFeatureCollection} from "../editable";
 import {GridFeatureCollection} from "../geojson";
 import {KeyEvents} from "../util";
@@ -43,6 +43,8 @@ export class ActionsControl extends Control.EasyBar {
 
     this.addButton(new ActionButton("fa-plus", () => this.createFeatureCollection(), "Create new feature collection [Ins]", "Insert"));
     this.addButton(new ActionButton("fa-th", () => this.createGrid(), "Create new grid [G]", "g"));
+    this.addButton(new ToggleButton("fa-comment", showText => this.setTextMarkerMode(showText),
+      "Permanently show marker text [T]", "Hide marker text [T]", "g"));
 
     // Create buttons which are only shown when a layer is selected
     this.buttons = [
@@ -62,6 +64,7 @@ export class ActionsControl extends Control.EasyBar {
   addTo(map: GeotoolMap): this {
     this.map = map;
     this.map.selectedCollection.subscribe(f => this.afterFeatureCollectionSelected(f));
+    this.setTextMarkerMode(false);
     return super.addTo(map);
   }
 
@@ -105,6 +108,11 @@ export class ActionsControl extends Control.EasyBar {
         }
       });
     }
+  }
+
+  private setTextMarkerMode(showText: boolean) {
+    this.map?.getContainer()?.classList.remove(showText ? 'text-markers-dots' : 'text-markers-text');
+    this.map?.getContainer()?.classList.add(showText ? 'text-markers-text' : 'text-markers-dots');
   }
 
   /**
