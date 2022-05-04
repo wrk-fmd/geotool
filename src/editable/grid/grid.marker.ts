@@ -23,7 +23,7 @@ export class GridMarker extends Marker implements EditableLayer, Csv.SupportsCsv
       icon: divIcon({
         className: "",
         iconSize: undefined,
-        html: `<span class="text-marker ${i + j <= 1 ? 'grid-base' : 'grid-generated'}" title="${text}"></span>`,
+        html: `<span class="text-marker ${i + j <= 1 ? 'grid-base' : 'grid-generated'}" data-text="${text}"></span>`,
       })
     });
   }
