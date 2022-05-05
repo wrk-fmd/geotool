@@ -157,10 +157,11 @@ export class EditableFeatureCollection extends FeatureCollectionLayer implements
   }
 
   toGeoJSON(): NamedFeatureCollection {
+    const markerDefaults = this.markerDefaults.getValues();
     return {
       ...<FeatureCollection>super.toGeoJSON(),
       name: this.name.value || "",
-      markerDefaults: this.markerDefaults.getValues()
+      markerDefaults: Object.keys(markerDefaults).length ? markerDefaults : undefined,
     };
   }
 
