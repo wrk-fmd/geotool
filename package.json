@@ -1,6 +1,6 @@
 {
   "name": "geotool",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "This tool helps with creating layers for Leaflet maps.",
   "main": "index.js",
   "scripts": {
