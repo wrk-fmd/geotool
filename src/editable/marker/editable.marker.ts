@@ -21,6 +21,7 @@ export class EditableMarker extends Marker implements EditableLayer, Csv.Support
 
   private readonly subscriptions: Subscription[] = [];
 
+  private text: string | null = null;
   private color: string | null = null;
   private icon: string | null = null;
   private hAnchor: string | null = null;
@@ -50,6 +51,7 @@ export class EditableMarker extends Marker implements EditableLayer, Csv.Support
     this.bindPopup(popup({minWidth: 350}).setContent(this.propertiesForm.container));
 
     // Subscribe to changes in the options
+    this.subscribeOption(options => options.text, value => this.text = value);
     this.subscribeOption(options => options.color, value => this.color = value);
     this.subscribeOption(options => options.icon, value => this.icon = value);
     this.subscribeOption(options => options.hAnchor, value => this.hAnchor = value);
@@ -101,18 +103,25 @@ export class EditableMarker extends Marker implements EditableLayer, Csv.Support
   }
 
   private updateMarker() {
+    this.options.title = this.text || undefined;
     const el = this.getElement();
     if (el && el.firstChild instanceof HTMLElement) {
       const icon = el.firstChild;
 
       // Set the color and style of the icon
       icon.style.color = this.color || "";
-      icon.className = `fas fa-2x ${this.icon || "fa-map-marker-alt"}`;
+      if (this.icon === 'text-marker') {
+        icon.className = 'text-marker';
+        icon.dataset.text = this.text || '';
+        icon.style.transform = '';
+      } else {
+        icon.className = `fas fa-2x ${this.icon || "fa-map-marker-alt"}`;
 
-      // Set the offset for the icon, which is given relative to bottom center
-      const left = this.hAnchor ? parseFloat(this.hAnchor) + 0.5 : 0.5;
-      const top = this.vAnchor ? parseFloat(this.vAnchor) + 1 : 1;
-      icon.style.transform = `translate(${-100 * left}%, ${-100 * top}%)`;
+        // Set the offset for the icon, which is given relative to bottom center
+        const left = this.hAnchor ? parseFloat(this.hAnchor) + 0.5 : 0.5;
+        const top = this.vAnchor ? parseFloat(this.vAnchor) + 1 : 1;
+        icon.style.transform = `translate(${-100 * left}%, ${-100 * top}%)`;
+      }
     }
   }
 

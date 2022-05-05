@@ -16,6 +16,7 @@ export class MarkerClasses {
     for (let i = 0; i < styleSheets.length; i++) {
       this.addStyleSheet(<CSSStyleSheet>styleSheets[i]);
     }
+    this.list.push('text-marker');
   }
 
   private addStyleSheet(styleSheet: CSSStyleSheet) {
