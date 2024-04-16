@@ -112,7 +112,7 @@ export class EditableMarker extends Marker implements EditableLayer, Csv.Support
       icon.style.color = this.color || "";
       if (this.icon === 'text-marker') {
         icon.className = 'text-marker';
-        icon.dataset.text = this.text || '';
+        icon.dataset.text = this.text?.split('\n')[0] || '';
         icon.style.transform = '';
       } else {
         icon.className = `fas fa-2x ${this.icon || "fa-map-marker-alt"}`;
