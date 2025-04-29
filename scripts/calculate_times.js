@@ -110,6 +110,9 @@ function calculateTime(waypoints, distance) {
 }
 
 function formatTime(time, withSeconds) {
+  // Add about half a second to prevent rounding errors
+  time += 0.0001;
+
   const hours = Math.floor(time) % 24;
 
   time = (time - hours) * 60;
