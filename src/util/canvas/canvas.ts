@@ -1,6 +1,9 @@
 import {Matrix3} from "../matrix";
 
-export type ImageSource = TexImageSource & CanvasImageSource;
+export type ImageSource = TexImageSource & CanvasImageSource & {
+  readonly height: number;
+  readonly width: number;
+};
 
 /**
  * This class is a wrapper around a HTML5 canvas used for exporting transformed images

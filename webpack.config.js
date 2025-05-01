@@ -18,7 +18,12 @@ module.exports = {
             sassOptions: {
               // SASS prints a lot of deprecation warnings for Bootstrap now,
               // but hiding them is probably not a good idea in the long run
-              quietDeps: true
+              quietDeps: true,
+              silenceDeprecations: [
+                // SASS imports will need to be replaced at some point,
+                // but probably won't be possible before Bootstrap 6
+                'import',
+              ],
             }
           }
         }],

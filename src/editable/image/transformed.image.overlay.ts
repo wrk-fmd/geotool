@@ -73,9 +73,9 @@ export class TransformedImageOverlay extends ImageOverlay {
   /**
    * Get the center of the (possibly distorted) image
    */
-  getCenter(): Point | null {
+  getCenter(): Point {
     if (!this._map) {
-      return null;
+      return super.getCenter();
     }
 
     const c = this.corners.map(corner => this._map.latLngToLayerPoint(corner)),
