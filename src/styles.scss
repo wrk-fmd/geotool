@@ -9,6 +9,7 @@ $font-size-base: 0.75rem;
 $form-group-margin-bottom: 0.5rem;
 @import "~bootstrap/scss/functions";
 @import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/maps";
 @import "~bootstrap/scss/mixins";
 @import "~bootstrap/scss/root";
 @import "~bootstrap/scss/reboot";
@@ -17,11 +18,11 @@ $form-group-margin-bottom: 0.5rem;
 @import "~bootstrap/scss/forms";
 @import "~bootstrap/scss/buttons";
 @import "~bootstrap/scss/transitions";
-@import "~bootstrap/scss/input-group";
 @import "~bootstrap/scss/close";
 @import "~bootstrap/scss/modal";
 @import "~bootstrap/scss/utilities";
-@import "~bootstrap/scss/print";
+@import "~bootstrap/scss/utilities/api";
+//@import "~bootstrap/scss/print";
 
 // Import required Fontawesome styles
 $fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
@@ -81,6 +82,10 @@ html, body {
       }
     }
   }
+}
+
+.leaflet-control-container {
+  @extend .d-print-none;
 }
 
 .modal {

@@ -3,7 +3,7 @@ import {Subject, Subscription} from "rxjs";
 import {DomUtil} from "leaflet";
 
 /**
- * This class is used to create a HTML form dynamically
+ * This class is used to create an HTML form dynamically
  */
 export class Form {
 
@@ -32,13 +32,14 @@ export class Form {
   private appendInput(field: FormField) {
     const id = `form-input-${++Form.id}`;
 
-    const row = DomUtil.create("div", "form-group row", this.container);
+    const row = DomUtil.create("div", "row mb-2", this.container);
 
     const label = <HTMLLabelElement>DomUtil.create("label", "col-4 col-form-label", row);
     label.innerText = field.label;
     label.htmlFor = id;
 
-    const inputGroup = DomUtil.create("div", "col-8 input-group", row);
+    const inputCol = DomUtil.create("div", "col-8", row);
+    const inputGroup = DomUtil.create("div", "input-group", inputCol);
 
     let input: HTMLTextAreaElement | HTMLInputElement, defaultValue = "";
     switch (field.type) {
@@ -57,6 +58,7 @@ export class Form {
       case "range":
         input = document.createElement("input");
         input.type = "range";
+        input.className = "form-range";
         defaultValue = "0";
 
         if (field.min !== undefined) {
@@ -84,18 +86,17 @@ export class Form {
             option.value = value;
             list.append(option);
           });
-          inputGroup.append(list);
+          row.append(list);
         }
 
         break;
     }
 
     input.id = id;
-    input.className = "form-control";
+    input.classList.add("form-control");
     inputGroup.append(input);
 
-    const inputAppend = DomUtil.create("div", "input-group-append", inputGroup);
-    const clear = DomUtil.create("button", "btn btn-sm btn-outline-secondary fas fa-backspace", inputAppend);
+    const clear = DomUtil.create("button", "btn btn-sm btn-outline-secondary fas fa-backspace", inputGroup);
     clear.onclick = () => {
       field.data.next(null);
       input.focus();

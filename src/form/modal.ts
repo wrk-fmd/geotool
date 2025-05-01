@@ -22,8 +22,7 @@ export class Modal {
     this.title.innerText = title;
 
     // Close button and event handler
-    const close = DomUtil.create("button", "close", header);
-    close.innerHTML = "&times;";
+    const close = DomUtil.create("button", "btn-close", header);
     close.onclick = () => this.close();
 
     // Modal body
