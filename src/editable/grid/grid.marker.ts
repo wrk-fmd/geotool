@@ -16,14 +16,14 @@ export class GridMarker extends Marker implements EditableLayer, Csv.SupportsCsv
    * @param j The vertical index of the marker (starting at 0)
    * @param latlng The coordinates of the marker
    */
-  constructor(private text: string, private readonly i: number, private readonly j: number, latlng: LatLngExpression) {
+  constructor(private text: string, private readonly i: number, private readonly j: number, latlng: LatLngExpression, base: boolean) {
     super(latlng, {
       riseOnHover: true,
       draggable: true,
       icon: divIcon({
         className: "",
         iconSize: undefined,
-        html: `<span class="text-marker ${i + j <= 1 ? 'grid-base' : 'grid-generated'}" data-text="${text}"></span>`,
+        html: `<span class="text-marker ${base ? 'grid-base' : 'grid-generated'}" data-text="${text}"></span>`,
       })
     });
   }

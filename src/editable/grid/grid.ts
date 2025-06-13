@@ -111,7 +111,7 @@ export class Grid extends EditableFeatureCollection {
           this.latlngs[i][j] = this.getPosition(i, j);
         }
 
-        col[j] = new GridMarker(this.getText(i, j), i, j, this.latlngs[i][j]!);
+        col[j] = new GridMarker(this.getText(i, j), i, j, this.latlngs[i][j]!, this.isBaseMarker(i, j));
         col[j]!.on("drag", () => this.updatePosition(i, j));
         this.addLayer(col[j]!);
       }
@@ -148,10 +148,14 @@ export class Grid extends EditableFeatureCollection {
   private updatePosition(i: number, j: number) {
     this.latlngs[i][j] = this.markers[i][j]!.getLatLng();
 
-    if (i + j <= 1) {
+    if (this.isBaseMarker(i, j)) {
       // Recalculate all marker positions if one of the three base markers was moved
       this.updateMarkers();
     }
+  }
+
+  private isBaseMarker(i: number, j: number) {
+    return (i === 0 && j === 0) || (i === 0 && j === this.vertical.size - 1) || (j === 0 && i === this.horizontal.size - 1);
   }
 
   /**
@@ -162,12 +166,14 @@ export class Grid extends EditableFeatureCollection {
       this.base = (<GridMarker>this.markers[0][0]).getLatLng();
     }
 
-    if (this.markers.length > 1 && this.markers[1].length > 0 && this.markers[1][0]) {
-      this.right = this.latLngDiff(this.base, (<GridMarker>this.markers[1][0]).getLatLng());
+    const rightIndex = this.markers.length - 1;
+    if (rightIndex && this.markers[rightIndex][0]) {
+      this.right = this.latLngDiff(this.base, (<GridMarker>this.markers[rightIndex][0]).getLatLng(), rightIndex);
     }
 
-    if (this.markers.length > 0 && this.markers[0].length > 1 && this.markers[0][1]) {
-      this.down = this.latLngDiff(this.base, (<GridMarker>this.markers[0][1]).getLatLng());
+    const downIndex = this.markers.length ?  this.markers[0].length - 1 : null;
+    if (downIndex && this.markers[0][downIndex]) {
+      this.down = this.latLngDiff(this.base, (<GridMarker>this.markers[0][downIndex]).getLatLng(), downIndex);
     }
 
     for (let i = 0; i < this.markers.length; i++) {
@@ -186,8 +192,8 @@ export class Grid extends EditableFeatureCollection {
    * @param a
    * @param b
    */
-  private latLngDiff(a: LatLng, b: LatLng): LatLng {
-    return latLng(b.lat - a.lat, b.lng - a.lng);
+  private latLngDiff(a: LatLng, b: LatLng, divisor: number): LatLng {
+    return latLng((b.lat - a.lat) / divisor, (b.lng - a.lng) / divisor);
   }
 
   /**
