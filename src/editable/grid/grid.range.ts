@@ -53,8 +53,17 @@ export class GridRange {
    * @return The string representation, e.g. "B" or "5"
    */
   toString(index: number): string {
-    const value = this.offset + index;
-    return this.numeric ? value.toString() : String.fromCharCode(value);
+    let value = this.offset + index;
+    if (this.numeric) {
+      return value.toString();
+    }
+
+    let str = '';
+    do {
+      str = String.fromCharCode(value % 26 + 64) + str;
+      value = Math.floor(value / 26);
+    } while (value > 0);
+    return str;
   }
 
   private calculateRange() {
@@ -66,12 +75,20 @@ export class GridRange {
     let startNumber = parseInt(this._start), endNumber = parseInt(this._end);
     if (isNaN(startNumber) || isNaN(endNumber)) {
       this.numeric = false;
-      this.offset = this._start.charCodeAt(0);
-      this._size = this._end.charCodeAt(0) - this.offset + 1;
+      this.offset = this.getNumericValue(this._start);
+      this._size = this.getNumericValue(this._end) - this.offset + 1;
     } else {
       this.numeric = true;
       this.offset = startNumber;
       this._size = endNumber - startNumber + 1;
     }
+  }
+
+  private getNumericValue(str: string) {
+    let value = 0;
+    for (let i = 0; i < str.length; i++) {
+      value = 26 * value + str.charCodeAt(i) - 64;
+    }
+    return value;
   }
 }
